@@ -34,7 +34,8 @@
     footer{border-top:1px solid #eef3f7;padding:18px 36px;color:var(--muted);font-size:13px}
     code.inline{background:#f3f6fb;padding:2px 6px;border-radius:4px;font-family:var(--mono)}
     @media (max-width:800px){nav{display:none} .container{padding:0} main{padding:18px}}
-  </style>
+  .active-link { font-weight: bold; color: #083d7c !important; text-decoration: underline; }
+    </style>
 </head>
 <body>
   <header>
@@ -409,6 +410,25 @@ cat SRR15571424_ann.vcf | grep "LOW"</pre>
 
     // Print
     document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+  // Scroll-Spy for auto-highlight in sidebar
+    document.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('section[id]');
+      let scrollPos = window.scrollY + 120;
+
+      sections.forEach(sec => {
+        const top = sec.offsetTop;
+        const bottom = top + sec.offsetHeight;
+        const id = sec.getAttribute('id');
+        const link = document.querySelector(`nav a[href="#${id}"]`);
+
+        if (scrollPos >= top && scrollPos < bottom) {
+          if (link) link.classList.add('active-link');
+        } else {
+          if (link) link.classList.remove('active-link');
+        }
+      });
+    });
+
   </script>
 </body>
 </html>
