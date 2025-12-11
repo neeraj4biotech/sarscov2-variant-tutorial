@@ -50,13 +50,69 @@
       <ul>
         <li><a href="#intro">Introduction</a></li>
         <li><a href="#objective">Objective</a></li>
-        <li><a href="#step1">Step 1 — Data Preparation</a></li>
-        <li><a href="#step2">Step 2 — Quality Check (FastQC)</a></li>
-        <li><a href="#step3">Step 3 — Read Trimming (Trim Galore)</a></li>
-        <li><a href="#step4">Step 4 — Reference Alignment (BWA)</a></li>
-        <li><a href="#step5">Step 5 — BAM Processing (SAMtools)</a></li>
-        <li><a href="#step6">Step 6 — Variant Calling (BCFtools)</a></li>
-        <li><a href="#step7">Step 7 — Variant Annotation (SnpEff)</a></li>
+
+        <li>
+          <strong>Step 1 — Data Preparation</strong>
+          <ul>
+            <li><a href="#step1-download">Download SRA Data</a></li>
+            <li><a href="#step1-fasterq">Convert to FASTQ</a></li>
+            <li><a href="#step1-gzip">Compress FASTQ</a></li>
+          </ul>
+        </li>
+
+        <li>
+          <strong>Step 2 — Quality Check (FastQC)</strong>
+          <ul>
+            <li><a href="#step2-run">Run FastQC</a></li>
+            <li><a href="#step2-output">View Output Reports</a></li>
+          </ul>
+        </li>
+
+        <li>
+          <strong>Step 3 — Read Trimming (Trim Galore)</strong>
+          <ul>
+            <li><a href="#step3-trim">Trim Reads</a></li>
+            <li><a href="#step3-output">Check Trimmed Files</a></li>
+          </ul>
+        </li>
+
+        <li>
+          <strong>Step 4 — Reference Alignment (BWA)</strong>
+          <ul>
+            <li><a href="#step4-index">Create Index</a></li>
+            <li><a href="#step4-mem">Run bwa mem</a></li>
+          </ul>
+        </li>
+
+        <li>
+          <strong>Step 5 — BAM Processing (SAMtools)</strong>
+          <ul>
+            <li><a href="#step5-convert">SAM → BAM</a></li>
+            <li><a href="#step5-sort">Sorting</a></li>
+            <li><a href="#step5-index">Indexing</a></li>
+            <li><a href="#step5-mapped">Mapped / Unmapped</a></li>
+            <li><a href="#step5-flagstat">Flagstat Summary</a></li>
+          </ul>
+        </li>
+
+        <li>
+          <strong>Step 6 — Variant Calling (BCFtools)</strong>
+          <ul>
+            <li><a href="#step6-mpileup">mpileup</a></li>
+            <li><a href="#step6-call">Variant Calling</a></li>
+          </ul>
+        </li>
+
+        <li>
+          <strong>Step 7 — Variant Annotation (SnpEff)</strong>
+          <ul>
+            <li><a href="#step7-build">Build Database</a></li>
+            <li><a href="#step7-annotate">Annotate VCF</a></li>
+            <li><a href="#step7-filter">Quick Filters</a></li>
+          </ul>
+        </li>
+
+        <li><a href="#workflow">Workflow Diagram</a></li>
         <li><a href="#references">Tool Documentation & Cross-References</a></li>
         <li><a href="#end">End of Tutorial</a></li>
       </ul>
@@ -196,7 +252,77 @@ cat SRR15571424_ann.vcf | grep "LOW"</pre>
         </div>
       </section>
 
-      <section id="references">
+      <section id="workflow">
+        <h2 class="section-title">Workflow Diagram</h2>
+        <p class="lead">The following diagram summarizes the SARS-CoV-2 Variant Calling Pipeline executed in this tutorial.</p>
+
+        <!-- Workflow SVG Diagram -->
+        <div style="text-align:center; margin: 20px 0;">
+        <svg width="420" height="780" xmlns="http://www.w3.org/2000/svg">
+            <style>
+                .box { fill:#e8f1fb; stroke:#0b63a5; stroke-width:2; rx:8; ry:8; }
+                .text { font-family:Arial, sans-serif; font-size:14px; }
+                .arrow { stroke:#0b63a5; stroke-width:2; marker-end:url(#arrowhead); }
+            </style>
+
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#0b63a5" />
+                </marker>
+            </defs>
+
+            <!-- Step 1 -->
+            <rect x="60" y="20" width="300" height="60" class="box" />
+            <text x="210" y="55" text-anchor="middle" class="text">1. Download Data (SRA Toolkit)</text>
+
+            <line x1="210" y1="80" x2="210" y2="115" class="arrow" />
+
+            <!-- Step 2 -->
+            <rect x="60" y="120" width="300" height="60" class="box" />
+            <text x="210" y="155" text-anchor="middle" class="text">2. Quality Check (FastQC)</text>
+
+            <line x1="210" y1="180" x2="210" y2="215" class="arrow" />
+
+            <!-- Step 3 -->
+            <rect x="60" y="220" width="300" height="60" class="box" />
+            <text x="210" y="255" text-anchor="middle" class="text">3. Read Trimming (Trim Galore)</text>
+
+            <line x1="210" y1="280" x2="210" y2="315" class="arrow" />
+
+            <!-- Step 4 -->
+            <rect x="60" y="320" width="300" height="60" class="box" />
+            <text x="210" y="355" text-anchor="middle" class="text">4. Reference Indexing (BWA)</text>
+
+            <line x1="210" y1="380" x2="210" y2="415" class="arrow" />
+
+            <!-- Step 5 -->
+            <rect x="60" y="420" width="300" height="60" class="box" />
+            <text x="210" y="455" text-anchor="middle" class="text">5. Read Alignment (bwa mem)</text>
+
+            <line x1="210" y1="480" x2="210" y2="515" class="arrow" />
+
+            <!-- Step 6 -->
+            <rect x="60" y="520" width="300" height="60" class="box" />
+            <text x="210" y="555" text-anchor="middle" class="text">6. BAM Processing (SAMtools)</text>
+
+            <line x1="210" y1="580" x2="210" y2="615" class="arrow" />
+
+            <!-- Step 7 -->
+            <rect x="60" y="620" width="300" height="60" class="box" />
+            <text x="210" y="655" text-anchor="middle" class="text">7. Variant Calling (BCFtools)</text>
+
+            <line x1="210" y1="680" x2="210" y2="715" class="arrow" />
+
+            <!-- Step 8 -->
+            <rect x="60" y="720" width="300" height="60" class="box" />
+            <text x="210" y="755" text-anchor="middle" class="text">8. Variant Annotation (SnpEff)</text>
+        </svg>
+        </div>
+
+        <p class="footnote">This workflow represents a standard SARS-CoV-2 reference-based variant calling pipeline widely used in genomic surveillance.</p>
+      </section>
+
+      $1
         <h2 class="section-title">Tool Documentation & Cross-References</h2>
         <p class="lead">Official documentation and helpful cross-reference pages for each tool used in this tutorial.</p>
 
