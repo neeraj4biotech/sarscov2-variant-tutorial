@@ -1,0 +1,148 @@
+###########################################
+# Tutorial: SARS-CoV-2 Variant Calling Pipeline on ICE-Cloud
+###########################################
+
+# Next-generation sequencing (NGS) technology has transformed research in disease surveillance 
+# and diagnostics. A major application has been in tracking emerging mutations in the
+# SARS-CoV-2 genome, which helps monitor viral evolution, transmissibility, vaccine
+# effectiveness, and informs public health decisions. The combination of reference genomes,
+# genome-specific primers, and standardized bioinformatics workflows has enabled rapid,
+# high-throughput genomic analysis during the COVID-19 pandemic. However, limited access to
+# bioinformatics resources and difficulties in authorized data sharing remain common hurdles.
+# ICE-cloud, developed by the HPC-Medical and Bioinformatics group at C-DAC Pune, addresses
+# these challenges by providing a unified platform for data storage, analysis, and sharing.
+# This tutorial demonstrates the execution of a SARS-CoV-2 variant calling pipeline on ICE-cloud.
+
+# Objective:
+# To perform reference-based mapping and variant calling of NGS data using ICE-cloud,
+# a high-performance computing platform designed for bioinformatics workflows.
+# This tutorial will guide you through uploading data, quality assessment, read trimming,
+# reference-based alignment, variant calling with annotation, and result interpretation.
+
+###########################################
+# Step 1: Data Preparation 
+###########################################
+# Instructions to start ICE job container:
+# Home =>  Images =>  Image Library => search "sratoolkit"
+# Memory Allocation => 8
+# CPU Allocation => 2
+# Wait until status is Running, copy password
+# Click on action (three dots) => Connect
+# Enter name and password to land in ICE terminal
+
+prefetch SRR15571424  
+fasterq-dump SRR15571424 -S -e 2 (-S paired end, -e thread)
+gzip fastq/SRR15571424_1.fastq
+gzip fastq/SRR15571424_2.fastq
+
+
+
+
+###########################################
+# Step 2: Quality Check (FastQC)
+###########################################
+
+# Instructions to start ICE job container:
+# Home =>  Images =>  Image Library => search "fastqc"
+# Memory Allocation => 8
+# CPU Allocation => 2
+# Wait until status is Running, copy password
+# Click on action (three dots) => Connect
+# Enter name and password to land in ICE terminal
+
+cp -r /drive/public/ICE_Workshop/AIC_CCMB/var_call_tutorial .
+
+ls -lrth
+
+cd var_call_tutorial
+
+fastqc --threads 5 SRR15571424_1.fastq.gz SRR15571424_2.fastq.gz
+ls -lrth
+
+#Close the terminal, Delete the container using "delete" keyword
+
+###########################################
+# Step 3: Read Trimming (trim_galore)
+###########################################
+
+# Home =>  Images =>  Image Library => search "trim_galore"
+# Launch new container (trim_galore) with 2 CPU and 8 GB Memory settings
+cd var_call_tutorial
+
+trim_galore --fastqc --paired SRR15571424_1.fastq.gz SRR15571424_2.fastq.gz
+ls -lrth
+
+#Close the terminal, Delete the container using "delete" keyword
+
+###########################################
+# Step 4: Reference Alignment (BWA)
+###########################################
+
+# Home =>  Images =>  Image Library => search "bwa"
+# Launch new container (bwa) with 2 CPU and 8 GB Memory settings
+cd var_call_tutorial
+
+bwa index MN908947.3.fna
+ls -lrth
+
+bwa mem -t 2 -R "@RG\tID:SRR15571424\tSM:SRR15571424\tPL:illumina\tLB:lib1\tPU:unit1" -V -M -o SRR15571424.sam MN908947.3.fna SRR15571424_1_val_1.fq.gz SRR15571424_2_val_2.fq.gz
+ls -lrth
+
+#Close the terminal, Delete the container using "delete" keyword
+
+###########################################
+# Step 5: BAM Processing (SAMtools)
+###########################################
+
+# Home =>  Images =>  Image Library => search "samtools"
+# Launch new container (samtools) with 2 CPU and 8 GB Memory settings
+cd var_call_tutorial
+
+samtools view -S -b SRR15571424.sam -o SRR15571424.bam --threads 5
+samtools sort SRR15571424.bam -o SRR15571424_sorted.bam --threads 5
+samtools index SRR15571424_sorted.bam
+samtools view -b -F 4 SRR15571424_sorted.bam > SRR15571424_mapped.bam
+samtools view -b -f 4 SRR15571424_sorted.bam > SRR15571424_unmapped.bam
+
+ls -lrth
+
+samtools flagstat SRR15571424_sorted.bam
+
+#Close the terminal, Delete the container using "delete" keyword
+
+###########################################
+# Step 6: Variant Calling (BCFtools)
+###########################################
+
+# Home =>  Images =>  Image Library => search "bcftools"
+# Launch new container (bcftools) with 2 CPU and 8 GB Memory settings
+cd var_call_tutorial
+
+bcftools mpileup -f MN908947.3.fna -Ou --threads 5 SRR15571424_sorted.bam -o SRR15571424.bcf
+bcftools call -mv -Ov --ploidy 1 --threads 2 SRR15571424.bcf -o SRR15571424.vcf
+
+ls -lrth
+
+#Close the terminal, Delete the container using "delete" keyword
+
+###########################################
+# Step 7: Variant Annotation (SnpEff)
+###########################################
+
+# Home =>  Images =>  Image Library => search "snpeff"
+# Launch new container (snpeff) with 2 CPU and 8 GB Memory settings
+cd var_call_tutorial
+
+/snpEff/scripts/buildDbNcbi.sh MN908947.3
+
+java -jar /snpEff/snpEff.jar ann -v MN908947.3 SRR15571424.vcf -csvStats SRR15571424_stat.csv -htmlStats SRR15571424_stat.html > SRR15571424_ann.vcf
+
+ls -lrth
+
+cat SRR15571424_ann.vcf | grep "missense_variant"
+cat SRR15571424_ann.vcf | grep "MODERATE"
+cat SRR15571424_ann.vcf | grep "LOW"
+
+###########################################
+# End of Tutorial
+###########################################
