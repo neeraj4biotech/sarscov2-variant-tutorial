@@ -3,251 +3,509 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
 <title>SARS-CoV-2 Variant Calling Tutorial — ICE-Cloud</title>
 
-<!-- =======================
-     BASIC PAGE STYLING
-======================= -->
-<style>
-body {font-family: Arial, sans-serif; margin: 0; padding: 0; line-height:1.6;}
-#sidebar {width: 260px; background:#f4f4f4; height:100vh; position:fixed; overflow:auto; padding:20px; border-right:1px solid #ccc;}
-#content {margin-left:280px; padding:30px;}
-h2 {color:#0b63a5; margin-top:48px;}
-h3 {color:#0b63a5; margin-top:32px;}
-.box {background:#e8f2ff; border-left:4px solid #0b63a5; padding:10px 14px; margin:12px 0; white-space:pre-line;}
-pre {background:#111827; color:#e5e7eb; padding:12px; border-radius:6px; overflow:auto;}
-.copy-btn {background:#0b63a5; color:white; border:none; padding:6px 10px; margin-bottom:6px; cursor:pointer; border-radius:4px;}
-.workflow {text-align:center; margin:20px 0; font-size:32px;}
-a {text-decoration:none; color:#0b63a5;}
-a:hover {text-decoration:underline;}
-.active {font-weight:bold; text-decoration:underline;}
+<!-- ============================
+     Prism.js (Syntax Highlighting)
+=============================== -->
+<link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
 
-/* Smooth Scroll */
-html { scroll-behavior: smooth; }
+<!-- ============================
+     Global Styles
+=============================== -->
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #ffffff;
+    line-height: 1.6;
+}
+
+/* Sticky Header */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 58px;
+    background: #0b63a5;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    z-index: 1000;
+    font-size: 18px;
+    justify-content: space-between;
+}
+
+header .menu-btn {
+    display: none;
+    font-size: 26px;
+    cursor: pointer;
+    padding: 8px;
+}
+
+/* Sidebar (Desktop) */
+#sidebar {
+    position: fixed;
+    top: 58px;
+    left: 0;
+    width: 270px;
+    bottom: 0;
+    background: #f3f7fa;
+    overflow-y: auto;
+    border-right: 1px solid #d6e1eb;
+    padding: 18px;
+}
+
+#sidebar h3 {
+    margin-top: 0;
+    color: #063b63;
+}
+
+#sidebar .collapsible-header {
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 14px;
+    color: #0b63a5;
+}
+
+#sidebar ul {
+    list-style: none;
+    padding-left: 14px;
+    margin-top: 6px;
+}
+
+#sidebar a {
+    text-decoration: none;
+    color: #063b63;
+}
+
+#sidebar a:hover {
+    text-decoration: underline;
+}
+
+/* Sidebar — Mobile slide-in */
+#sidebar-mobile-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 998;
+}
+
+#sidebar.mobile-active {
+    left: 0 !important;
+}
+
+/* Main Content */
+#content {
+    margin-left: 290px;
+    padding: 90px 40px 40px;
+}
+
+/* Collapsible Step Blocks */
+.step-block {
+    border-left: 4px solid #0b63a5;
+    background: #e8f2ff;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #063b63;
+    border-radius: 4px;
+}
+
+.step-content {
+    display: none;
+    margin-bottom: 20px;
+}
+
+/* Copy Button */
+.copy-btn {
+    background: #0b63a5;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    float: right;
+}
+
+.copy-btn.copied {
+    background: #1ea650 !important;
+}
+
+/* Workflow Diagram */
+.workflow {
+    display: flex;
+    gap: 14px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 10px 0;
+}
+
+.workflow .wf-card {
+    background: #e8f1fb;
+    border: 2px solid #0b63a5;
+    padding: 12px 16px;
+    border-radius: 10px;
+    text-align: center;
+    min-width: 130px;
+    font-size: 15px;
+}
+
+.workflow .arrow {
+    font-size: 26px;
+    align-self: center;
+}
+
+/* Prism */
+pre[class*="language-"] {
+    border-radius: 8px;
+    padding: 14px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 900px) {
+
+    header .menu-btn {
+        display: block;
+    }
+
+    #sidebar {
+        left: -320px;
+        width: 260px;
+        transition: left 0.25s ease;
+    }
+
+    #sidebar-mobile-overlay {
+        display: block;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+    }
+
+    #sidebar.mobile-active ~ #sidebar-mobile-overlay {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    #content {
+        margin-left: 0;
+        padding: 100px 20px;
+    }
+}
 </style>
 
 </head>
+
+
 <body>
 
-<!-- =======================
-     SIDEBAR NAVIGATION
-======================= -->
+<!-- Sticky Header -->
+<header>
+    <div class="menu-btn" onclick="toggleSidebar()">☰</div>
+    SARS-CoV-2 Variant Calling Tutorial
+</header>
+
+<!-- Sidebar -->
 <div id="sidebar">
-<h3>Contents</h3>
-<ul>
-<li><a href="#intro">Introduction</a></li>
-<li><a href="#objective">Objective</a></li>
-<li><a href="#step1">Step 1 — Data Preparation</a></li>
-<li><a href="#step2">Step 2 — FastQC</a></li>
-<li><a href="#step3">Step 3 — Trimming</a></li>
-<li><a href="#step4">Step 4 — Alignment</a></li>
-<li><a href="#step5">Step 5 — BAM Processing</a></li>
-<li><a href="#step6">Step 6 — Variant Calling</a></li>
-<li><a href="#step7">Step 7 — Annotation</a></li>
-<li><a href="#docs">Tool Documentation</a></li>
-<li><a href="#end">End of Tutorial</a></li>
-</ul>
+    <h3>Contents</h3>
+
+    <div class="collapsible-header">Introduction</div>
+    <ul>
+        <li><a href="#intro">Intro Overview</a></li>
+        <li><a href="#objective">Objective</a></li>
+        <li><a href="#workflow">Workflow Diagram</a></li>
+    </ul>
+
+    <div class="collapsible-header">Pipeline Steps</div>
+    <ul>
+        <li><a href="#step1">Step 1 — Data Preparation</a></li>
+        <li><a href="#step2">Step 2 — FastQC</a></li>
+        <li><a href="#step3">Step 3 — Trimming</a></li>
+        <li><a href="#step4">Step 4 — Alignment</a></li>
+        <li><a href="#step5">Step 5 — BAM Processing</a></li>
+        <li><a href="#step6">Step 6 — Variant Calling</a></li>
+        <li><a href="#step7">Step 7 — Annotation</a></li>
+    </ul>
+
+    <div class="collapsible-header">Tool Documentation</div>
+    <ul>
+        <li><a href="#docs">Reference Links</a></li>
+    </ul>
 </div>
 
-<!-- =======================
-     MAIN CONTENT
-======================= -->
-<div id="content">
+<div id="sidebar-mobile-overlay" onclick="toggleSidebar()"></div>
 
-<!-- INTRODUCTION -->
+<!-- Main Content Begins -->
+<div id="content">
+<!-- ============================
+     Introduction
+=============================== -->
 <h2 id="intro">Introduction</h2>
 <p>
-Next-generation sequencing (NGS) technology has transformed research in disease surveillance 
-and diagnostics. A major application has been tracking emerging mutations in the SARS-CoV-2 genome,
-which helps monitor viral evolution, transmissibility, vaccine effectiveness, and informs public health decisions.
-ICE-Cloud, developed by C-DAC Pune, provides a unified platform for data storage, analysis, and sharing.
-This tutorial demonstrates the execution of a SARS-CoV-2 variant calling pipeline on ICE-Cloud.
+Next-generation sequencing (NGS) technology has transformed disease surveillance and diagnostics.  
+It has been crucial in tracking emerging SARS-CoV-2 mutations affecting viral evolution, transmissibility, and vaccine response.  
+ICE-Cloud, developed by C-DAC Pune, provides a unified HPC environment for data storage, analysis, and sharing.
 </p>
 
-<!-- WORKFLOW SECTION -->
-<h2>Workflow Diagram</h2>
+<h2 id="workflow">Workflow Diagram</h2>
 <div class="workflow">
-📥 ➜ 🔍 ➜ ✂️ ➜ 🧬 ➜ 🧹 ➜ 🧪 ➜ 🧠
+    <div class="wf-card">📥<br>Download</div>
+    <div class="arrow">➜</div>
+
+    <div class="wf-card">🔍<br>FastQC</div>
+    <div class="arrow">➜</div>
+
+    <div class="wf-card">✂️<br>Trim</div>
+    <div class="arrow">➜</div>
+
+    <div class="wf-card">🧬<br>BWA</div>
+    <div class="arrow">➜</div>
+
+    <div class="wf-card">🧹<br>SAMtools</div>
+    <div class="arrow">➜</div>
+
+    <div class="wf-card">🧪<br>BCFtools</div>
+    <div class="arrow">➜</div>
+
+    <div class="wf-card">🧠<br>SnpEff</div>
 </div>
 
-<!-- OBJECTIVE -->
 <h2 id="objective">Objective</h2>
 <p>
-To perform reference-based mapping and variant calling of NGS data using ICE-Cloud, including:
-<strong>uploading data, QC, trimming, alignment, variant calling, annotation, and interpretation.</strong>
+To perform complete reference-based mapping and variant calling using ICE-Cloud, including:  
+<strong>Quality check → Trimming → Alignment → BAM processing → Variant calling → Annotation.</strong>
 </p>
 
-<!-- STEP 1 -->
-<h2 id="step1">Step 1 — Data Preparation</h2>
+<br>
 
-<div class="box">
-Instructions to start ICE Job Container:
-Home → Images → Image Library → Search “sratoolkit”
-Memory: 8 GB  
-CPU: 2  
-Connect to terminal after container starts.
+<!-- ============================
+     Step 1
+=============================== -->
+<div class="step-block" onclick="toggleStep('step1-content')">
+Step 1 — Data Preparation
 </div>
+<div id="step1-content" class="step-content">
 
-<button class="copy-btn" onclick="copyText('cmd1')">Copy</button>
-<pre id="cmd1">prefetch SRR15571424
+<p class="box">
+Instructions:<br>
+Home → Images → Search “sratoolkit”<br>
+CPU: 2<br>
+Memory: 8 GB
+</p>
+
+<button class="copy-btn" data-target="cmd1">Copy</button>
+<pre class="language-bash" id="cmd1">
+prefetch SRR15571424
 fasterq-dump SRR15571424 -S -e 2
 gzip fastq/SRR15571424_1.fastq
-gzip fastq/SRR15571424_2.fastq</pre>
-
-<!-- STEP 2 -->
-<h2 id="step2">Step 2 — Quality Check (FastQC)</h2>
-
-<div class="box">
-Start container: fastqc  
-Memory: 8 GB  
-CPU: 2
+gzip fastq/SRR15571424_2.fastq
+</pre>
 </div>
 
-<button class="copy-btn" onclick="copyText('cmd2')">Copy</button>
-<pre id="cmd2">cp -r /drive/public/ICE_Workshop/AIC_CCMB/var_call_tutorial .
+<!-- ============================
+     Step 2
+=============================== -->
+<div class="step-block" onclick="toggleStep('step2-content')">
+Step 2 — Quality Check (FastQC)
+</div>
+<div id="step2-content" class="step-content">
+
+<p class="box">
+Container: fastqc<br>
+CPU: 2<br>
+Memory: 8 GB
+</p>
+
+<button class="copy-btn" data-target="cmd2">Copy</button>
+<pre class="language-bash" id="cmd2">
+cp -r /drive/public/ICE_Workshop/AIC_CCMB/var_call_tutorial .
 cd var_call_tutorial
 fastqc --threads 5 SRR15571424_1.fastq.gz SRR15571424_2.fastq.gz
-ls -lrth</pre>
-
-<!-- STEP 3 -->
-<h2 id="step3">Step 3 — Read Trimming (Trim Galore)</h2>
-
-<div class="box">
-Start container: trim_galore  
-Memory: 8 GB  
-CPU: 2
+ls -lrth
+</pre>
 </div>
 
-<button class="copy-btn" onclick="copyText('cmd3')">Copy</button>
-<pre id="cmd3">cd var_call_tutorial
+<!-- ============================
+     Step 3
+=============================== -->
+<div class="step-block" onclick="toggleStep('step3-content')">
+Step 3 — Read Trimming (Trim Galore)
+</div>
+<div id="step3-content" class="step-content">
+
+<p class="box">
+Container: trim_galore<br>
+CPU: 2<br>
+Memory: 8 GB
+</p>
+
+<button class="copy-btn" data-target="cmd3">Copy</button>
+<pre class="language-bash" id="cmd3">
+cd var_call_tutorial
 trim_galore --fastqc --paired SRR15571424_1.fastq.gz SRR15571424_2.fastq.gz
-ls -lrth</pre>
-
-<!-- STEP 4 -->
-<h2 id="step4">Step 4 — Reference Alignment (BWA)</h2>
-
-<div class="box">
-Start container: bwa  
-Memory: 8 GB  
-CPU: 2
+ls -lrth
+</pre>
 </div>
 
-<button class="copy-btn" onclick="copyText('cmd4')">Copy</button>
-<pre id="cmd4">cd var_call_tutorial
+<!-- ============================
+     Step 4
+=============================== -->
+<div class="step-block" onclick="toggleStep('step4-content')">
+Step 4 — Reference Alignment (BWA)
+</div>
+<div id="step4-content" class="step-content">
+
+<p class="box">
+Container: bwa<br>
+CPU: 2<br>
+Memory: 8 GB
+</p>
+
+<button class="copy-btn" data-target="cmd4">Copy</button>
+<pre class="language-bash" id="cmd4">
+cd var_call_tutorial
 bwa index MN908947.3.fna
-bwa mem -t 2 -R "@RG	ID:SRR15571424	SM:SRR15571424	PL:illumina	LB:lib1	PU:unit1" -V -M -o SRR15571424.sam MN908947.3.fna SRR15571424_1_val_1.fq.gz SRR15571424_2_val_2.fq.gz
-ls -lrth</pre>
-<!-- ======================================
-     STEP 5 — BAM PROCESSING
-======================================= -->
-<h2 id="step5">Step 5 — BAM Processing (SAMtools)</h2>
-
-<div class="box">
-Start container: samtools  
-Memory: 8 GB  
-CPU: 2
+bwa mem -t 2 -R "@RG    ID:SRR15571424  SM:SRR15571424  PL:illumina  LB:lib1  PU:unit1" \
+    -V -M -o SRR15571424.sam MN908947.3.fna \
+    SRR15571424_1_val_1.fq.gz SRR15571424_2_val_2.fq.gz
+ls -lrth
+</pre>
 </div>
 
-<button class="copy-btn" onclick="copyText('cmd5')">Copy</button>
-<pre id="cmd5">samtools view -S -b SRR15571424.sam -o SRR15571424.bam --threads 5
+<!-- ============================
+     Step 5
+=============================== -->
+<div class="step-block" onclick="toggleStep('step5-content')">
+Step 5 — BAM Processing (SAMtools)
+</div>
+<div id="step5-content" class="step-content">
+
+<p class="box">
+Container: samtools<br>
+CPU: 2<br>
+Memory: 8 GB
+</p>
+
+<button class="copy-btn" data-target="cmd5">Copy</button>
+<pre class="language-bash" id="cmd5">
+samtools view -S -b SRR15571424.sam -o SRR15571424.bam --threads 5
 samtools sort SRR15571424.bam -o SRR15571424_sorted.bam --threads 5
 samtools index SRR15571424_sorted.bam
 samtools view -b -F 4 SRR15571424_sorted.bam > SRR15571424_mapped.bam
 samtools view -b -f 4 SRR15571424_sorted.bam > SRR15571424_unmapped.bam
 samtools flagstat SRR15571424_sorted.bam
-ls -lrth</pre>
-
-<!-- ======================================
-     STEP 6 — VARIANT CALLING
-======================================= -->
-<h2 id="step6">Step 6 — Variant Calling (BCFtools)</h2>
-
-<div class="box">
-Start container: bcftools  
-Memory: 8 GB  
-CPU: 2
-</div>
-
-<button class="copy-btn" onclick="copyText('cmd6')">Copy</button>
-<pre id="cmd6">bcftools mpileup -f MN908947.3.fna -Ou --threads 5 SRR15571424_sorted.bam -o SRR15571424.bcf
-bcftools call -mv -Ov --ploidy 1 --threads 2 SRR15571424.bcf -o SRR15571424.vcf
-ls -lrth</pre>
-
-<!-- ======================================
-     STEP 7 — VARIANT ANNOTATION
-======================================= -->
-<h2 id="step7">Step 7 — Variant Annotation (SnpEff)</h2>
-
-<div class="box">
-Start container: snpeff  
-Memory: 8 GB  
-CPU: 2
-</div>
-
-<button class="copy-btn" onclick="copyText('cmd7')">Copy</button>
-<pre id="cmd7">/snpEff/scripts/buildDbNcbi.sh MN908947.3
-java -jar /snpEff/snpEff.jar ann -v MN908947.3 SRR15571424.vcf \
-  -csvStats SRR15571424_stat.csv \
-  -htmlStats SRR15571424_stat.html > SRR15571424_ann.vcf
-
-grep "missense_variant" SRR15571424_ann.vcf
-grep "MODERATE" SRR15571424_ann.vcf
-grep "LOW" SRR15571424_ann.vcf
+ls -lrth
 </pre>
+</div>
 
-<!-- ======================================
-     TOOL DOCUMENTATION
-======================================= -->
+<!-- ============================
+     Step 6
+=============================== -->
+<div class="step-block" onclick="toggleStep('step6-content')">
+Step 6 — Variant Calling (BCFtools)
+</div>
+<div id="step6-content" class="step-content">
+
+<p class="box">
+Container: bcftools<br>
+CPU: 2<br>
+Memory: 8 GB
+</p>
+
+<button class="copy-btn" data-target="cmd6">Copy</button>
+<pre class="language-bash" id="cmd6">
+bcftools mpileup -f MN908947.3.fna -Ou --threads 5 SRR15571424_sorted.bam -o SRR15571424.bcf
+bcftools call -mv -Ov --ploidy 1 --threads 2 SRR15571424.bcf -o SRR15571424.vcf
+ls -lrth
+</pre>
+</div>
+
+<!-- ============================
+     Step 7
+=============================== -->
+<div class="step-block" onclick="toggleStep('step7-content')">
+Step 7 — Variant Annotation (SnpEff)
+</div>
+<div id="step7-content" class="step-content">
+
+<p class="box">
+Container: SnpEff<br>
+CPU: 2<br>
+Memory: 8 GB
+</p>
+
+<button class="copy-btn" data-target="cmd7">Copy</button>
+<pre class="language-bash" id="cmd7">
+/snpEff/scripts/buildDbNcbi.sh MN908947.3
+java -jar /snpEff/snpEff.jar ann -v MN908947.3 SRR15571424.vcf \
+    -csvStats SRR15571424_stat.csv -htmlStats SRR15571424_stat.html \
+    > SRR15571424_ann.vcf
+
+cat SRR15571424_ann.vcf | grep "missense_variant"
+cat SRR15571424_ann.vcf | grep "MODERATE"
+cat SRR15571424_ann.vcf | grep "LOW"
+</pre>
+</div>
+
+<!-- ============================
+     Documentation
+=============================== -->
 <h2 id="docs">Tool Documentation</h2>
-
 <ul>
 <li><a href="https://github.com/ncbi/sra-tools" target="_blank">SRA Toolkit</a></li>
 <li><a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a></li>
 <li><a href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a></li>
 <li><a href="https://github.com/lh3/bwa" target="_blank">BWA</a></li>
 <li><a href="https://www.htslib.org/" target="_blank">SAMtools</a></li>
-<li><a href="https://samtools.github.io/bcftools/bcftools.html" target="_blank">BCFtools</a></li>
+<li><a href="https://samtools.github.io/bcftools/" target="_blank">BCFtools</a></li>
 <li><a href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a></li>
 </ul>
 
-<!-- ======================================
-     END OF TUTORIAL
-======================================= -->
-<h2 id="end">End of Tutorial</h2>
-<p>You have completed the SARS-CoV-2 Variant Calling Tutorial on ICE-Cloud.</p>
-<p>Created for ICE-Cloud users — includes copy buttons and tool documentation links.</p>
+<br><br>
 
-</div> <!-- END CONTENT -->
+<footer style="text-align:center; padding:20px; color:#666;">
+Created for ICE-Cloud users • Variant Calling Tutorial
+</footer>
 
-<!-- ======================================
-     JAVASCRIPT — COPY BUTTON + SCROLL HIGHLIGHT
-======================================= -->
+</div> <!-- end content -->
+
+<!-- ============================
+     JavaScript Logic
+=============================== -->
 <script>
-// COPY BUTTON FUNCTIONALITY
-function copyText(id) {
-    const text = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(text);
-    alert("Copied to clipboard!");
+// Sidebar (Mobile)
+function toggleSidebar() {
+    const sb = document.getElementById("sidebar");
+    sb.classList.toggle("mobile-active");
 }
 
-// SCROLL SPY TO HIGHLIGHT ACTIVE SIDEBAR LINK
-document.addEventListener("scroll", () => {
-    const sections = document.querySelectorAll("h2[id]");
-    let scrollPos = window.scrollY + 120;
+// Collapsible Step Blocks
+function toggleStep(id) {
+    const block = document.getElementById(id);
+    block.style.display = (block.style.display === "block") ? "none" : "block";
+}
 
-    sections.forEach(sec => {
-        const top = sec.offsetTop;
-        const bottom = top + sec.offsetHeight;
-        const id = sec.getAttribute("id");
+// Copy Buttons
+document.querySelectorAll(".copy-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const id = btn.dataset.target;
+        const text = document.getElementById(id).innerText;
 
-        const link = document.querySelector(`#sidebar a[href="#${id}"]`);
-        if (!link) return;
-
-        if (scrollPos >= top && scrollPos < bottom) {
-            link.classList.add("active");
-        } else {
-            link.classList.remove("active");
-        }
+        navigator.clipboard.writeText(text).then(() => {
+            btn.classList.add("copied");
+            btn.innerText = "Copied!";
+            setTimeout(() => {
+                btn.classList.remove("copied");
+                btn.innerText = "Copy";
+            }, 1400);
+        });
     });
 });
 </script>
