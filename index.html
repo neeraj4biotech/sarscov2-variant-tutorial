@@ -6,7 +6,6 @@
 <title>SARS-CoV-2 Variant Calling Tutorial — ICE-Cloud</title>
 
 <style>
-/* ====== BASIC LAYOUT ====== */
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
@@ -33,15 +32,20 @@ body {
   max-width: 1100px;
 }
 
-/* ====== TEXT ====== */
-h1 { color: #0b63a5; }
-h2 { color: #0b63a5; margin-top: 40px; }
-h3 { margin-top: 25px; }
+h1, h2 {
+  color: #0b63a5;
+}
 
-a { color: #0b63a5; text-decoration: none; }
-a:hover { text-decoration: underline; }
+a.tool-link {
+  color: #0b63a5;
+  font-weight: 600;
+  text-decoration: none;
+}
 
-/* ====== BOXES ====== */
+a.tool-link:hover {
+  text-decoration: underline;
+}
+
 .note {
   background: #eef5ff;
   border-left: 4px solid #0b63a5;
@@ -57,7 +61,6 @@ pre {
   overflow-x: auto;
 }
 
-/* ====== COPY BUTTON ====== */
 .copy-btn {
   background: #0b63a5;
   color: white;
@@ -68,7 +71,6 @@ pre {
   margin-bottom: 6px;
 }
 
-/* ====== COLLAPSIBLE ====== */
 details {
   background: #fafafa;
   border: 1px solid #ddd;
@@ -84,14 +86,12 @@ summary {
   color: #0b63a5;
 }
 
-/* ====== WORKFLOW ====== */
 .workflow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   margin: 20px 0;
-  font-size: 14px;
 }
 
 .wf-box {
@@ -103,24 +103,20 @@ summary {
   min-width: 120px;
 }
 
-.arrow { font-size: 22px; }
-
-/* ====== SIDEBAR ====== */
-#sidebar ul { padding-left: 18px; }
-#sidebar li { margin: 8px 0; }
+.arrow {
+  font-size: 22px;
+}
 </style>
 
 <script>
 function copyText(id) {
-  const text = document.getElementById(id).innerText;
-  navigator.clipboard.writeText(text);
+  navigator.clipboard.writeText(document.getElementById(id).innerText);
 }
 </script>
 </head>
 
 <body>
 
-<!-- ================= SIDEBAR ================= -->
 <div id="sidebar">
 <h2>Contents</h2>
 <ul>
@@ -138,10 +134,11 @@ function copyText(id) {
 </ul>
 </div>
 
-<!-- ================= CONTENT ================= -->
 <div id="content">
 
-<h1 id="intro">SARS-CoV-2 Variant Calling Pipeline on ICE-Cloud</h1>
+<h1 id="intro">SARS-CoV-2 Variant Calling Pipeline on 
+<a class="tool-link" href="https://icecloud.in/home" target="_blank">ICE-Cloud</a>
+</h1>
 
 <p>
 Next-generation sequencing (NGS) technology has transformed research in disease surveillance
@@ -158,10 +155,11 @@ sharing remain common hurdles.
 </p>
 
 <p>
-ICE-Cloud, developed by the HPC-Medical and Bioinformatics group at <strong>C-DAC Pune</strong>,
+<a class="tool-link" href="https://icecloud.in/home" target="_blank">ICE-Cloud</a>,
+developed by the HPC-Medical and Bioinformatics group at <strong>C-DAC Pune</strong>,
 addresses these challenges by providing a unified platform for data storage, analysis,
 and sharing. This tutorial demonstrates a complete SARS-CoV-2 variant calling workflow
-executed on ICE-Cloud.
+executed on <a class="tool-link" href="https://icecloud.in/home" target="_blank">ICE-Cloud</a>.
 </p>
 
 <h2 id="workflow">Workflow Diagram</h2>
@@ -169,38 +167,57 @@ executed on ICE-Cloud.
 <div class="workflow">
   <div class="wf-box">📥<br>Download<br>SRA</div>
   <div class="arrow">➜</div>
-  <div class="wf-box">🔍<br>FastQC</div>
+  <div class="wf-box">🔍<br>
+    <a class="tool-link" href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a>
+  </div>
   <div class="arrow">➜</div>
-  <div class="wf-box">✂️<br>Trim Galore</div>
+  <div class="wf-box">✂️<br>
+    <a class="tool-link" href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a>
+  </div>
   <div class="arrow">➜</div>
-  <div class="wf-box">🧬<br>BWA</div>
+  <div class="wf-box">🧬<br>
+    <a class="tool-link" href="https://github.com/lh3/bwa" target="_blank">BWA</a>
+  </div>
   <div class="arrow">➜</div>
-  <div class="wf-box">🧹<br>SAMtools</div>
+  <div class="wf-box">🧹<br>
+    <a class="tool-link" href="https://www.htslib.org/" target="_blank">SAMtools</a>
+  </div>
   <div class="arrow">➜</div>
-  <div class="wf-box">🧪<br>BCFtools</div>
+  <div class="wf-box">🧪<br>
+    <a class="tool-link" href="https://samtools.github.io/bcftools/" target="_blank">BCFtools</a>
+  </div>
   <div class="arrow">➜</div>
-  <div class="wf-box">🧠<br>SnpEff</div>
+  <div class="wf-box">🧠<br>
+    <a class="tool-link" href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a>
+  </div>
 </div>
 
 <h2 id="objective">Objective</h2>
 
 <p>
-To perform reference-based mapping and variant calling of NGS data using ICE-Cloud,
+To perform reference-based mapping and variant calling of NGS data using
+<a class="tool-link" href="https://icecloud.in/home" target="_blank">ICE-Cloud</a>,
 a high-performance computing platform designed for bioinformatics workflows.
-This tutorial guides users through data upload, quality assessment, read trimming,
+This tutorial guides users through uploading data, quality assessment, read trimming,
 reference-based alignment, variant calling with annotation, and result interpretation.
 </p>
 <!-- ================= STEP 1 ================= -->
 <details id="step1">
-<summary>Step 1 — Data Preparation (SRA Toolkit)</summary>
+<summary>
+Step 1 — Data Preparation (
+<a class="tool-link" href="https://github.com/ncbi/sra-tools" target="_blank">SRA Toolkit</a>
+)
+</summary>
 
 <p><strong>What this step does:</strong><br>
-Downloads raw sequencing data from the NCBI Sequence Read Archive (SRA) and converts it into FASTQ format suitable for downstream analysis.
+Downloads raw sequencing data from the NCBI Sequence Read Archive (SRA) and converts it into
+FASTQ format, which is required for downstream quality control and alignment.
 </p>
 
 <div class="note">
 <strong>ICE-Cloud container setup:</strong><br>
-Image: <a href="https://github.com/ncbi/sra-tools" target="_blank">SRA Toolkit</a><br>
+Platform: <a class="tool-link" href="https://icecloud.in/home" target="_blank">ICE-Cloud</a><br>
+Image: <a class="tool-link" href="https://github.com/ncbi/sra-tools" target="_blank">SRA Toolkit</a><br>
 CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
 </div>
 
@@ -210,29 +227,33 @@ fasterq-dump SRR15571424 -S -e 2
 gzip fastq/SRR15571424_1.fastq
 gzip fastq/SRR15571424_2.fastq</pre>
 
-<p><strong>Explanation of commands:</strong></p>
+<p><strong>Explanation of parameters:</strong></p>
 <ul>
 <li><code>prefetch</code> — downloads the SRA file from NCBI.</li>
-<li><code>fasterq-dump</code> — converts SRA format to FASTQ.</li>
-<li><code>-S</code> — outputs split (paired-end) FASTQ files.</li>
-<li><code>-e 2</code> — uses 2 CPU threads.</li>
-<li><code>gzip</code> — compresses FASTQ files to save storage.</li>
+<li><code>fasterq-dump</code> — converts SRA format into FASTQ.</li>
+<li><code>-S</code> — splits paired-end reads into separate files.</li>
+<li><code>-e 2</code> — uses two CPU threads.</li>
+<li><code>gzip</code> — compresses FASTQ files to reduce disk usage.</li>
 </ul>
-
 </details>
 
 <!-- ================= STEP 2 ================= -->
 <details id="step2">
-<summary>Step 2 — Quality Check (FastQC)</summary>
+<summary>
+Step 2 — Quality Check (
+<a class="tool-link" href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a>
+)
+</summary>
 
 <p><strong>What this step does:</strong><br>
-Assesses the quality of raw sequencing reads, including base quality, GC content,
-sequence duplication, and adapter contamination.
+Evaluates the quality of raw sequencing reads, including base quality scores, GC content,
+sequence duplication levels, and adapter contamination.
 </p>
 
 <div class="note">
 <strong>ICE-Cloud container setup:</strong><br>
-Image: <a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a><br>
+Platform: <a class="tool-link" href="https://icecloud.in/home" target="_blank">ICE-Cloud</a><br>
+Image: <a class="tool-link" href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a><br>
 CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
 </div>
 
@@ -244,25 +265,30 @@ ls -lrth</pre>
 
 <p><strong>Explanation of parameters:</strong></p>
 <ul>
-<li><code>--threads 5</code> — speeds up analysis using 5 CPU cores.</li>
-<li><code>*.fastq.gz</code> — paired-end compressed FASTQ files.</li>
-<li><code>ls -lrth</code> — lists generated FastQC HTML and ZIP reports.</li>
+<li><code>--threads 5</code> — runs FastQC using five CPU cores.</li>
+<li><code>SRR15571424_1.fastq.gz</code> — forward reads.</li>
+<li><code>SRR15571424_2.fastq.gz</code> — reverse reads.</li>
+<li><code>ls -lrth</code> — lists generated FastQC reports.</li>
 </ul>
-
 </details>
 
 <!-- ================= STEP 3 ================= -->
 <details id="step3">
-<summary>Step 3 — Read Trimming (Trim Galore)</summary>
+<summary>
+Step 3 — Read Trimming (
+<a class="tool-link" href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a>
+)
+</summary>
 
 <p><strong>What this step does:</strong><br>
-Removes adapter sequences and low-quality bases from reads to improve alignment accuracy
+Removes sequencing adapters and low-quality bases from reads to improve alignment accuracy
 and reduce false-positive variant calls.
 </p>
 
 <div class="note">
 <strong>ICE-Cloud container setup:</strong><br>
-Image: <a href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a><br>
+Platform: <a class="tool-link" href="https://icecloud.in/home" target="_blank">ICE-Cloud</a><br>
+Image: <a class="tool-link" href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a><br>
 CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
 </div>
 
@@ -273,25 +299,29 @@ ls -lrth</pre>
 
 <p><strong>Explanation of parameters:</strong></p>
 <ul>
-<li><code>--paired</code> — indicates paired-end sequencing data.</li>
-<li><code>--fastqc</code> — runs FastQC again on trimmed reads.</li>
-<li><code>_val_1.fq.gz / _val_2.fq.gz</code> — trimmed output files.</li>
+<li><code>--paired</code> — specifies paired-end reads.</li>
+<li><code>--fastqc</code> — performs FastQC on trimmed reads.</li>
+<li><code>_val_1.fq.gz</code> / <code>_val_2.fq.gz</code> — trimmed output files.</li>
 </ul>
-
 </details>
 
 <!-- ================= STEP 4 ================= -->
 <details id="step4">
-<summary>Step 4 — Reference Alignment (BWA)</summary>
+<summary>
+Step 4 — Reference Alignment (
+<a class="tool-link" href="https://github.com/lh3/bwa" target="_blank">BWA</a>
+)
+</summary>
 
 <p><strong>What this step does:</strong><br>
-Aligns trimmed sequencing reads to the SARS-CoV-2 reference genome to determine
-their genomic positions.
+Aligns trimmed sequencing reads to the SARS-CoV-2 reference genome to determine their
+genomic positions and generate alignment files.
 </p>
 
 <div class="note">
 <strong>ICE-Cloud container setup:</strong><br>
-Image: <a href="https://github.com/lh3/bwa" target="_blank">BWA</a><br>
+Platform: <a class="tool-link" href="https://icecloud.in/home" target="_blank">ICE-Cloud</a><br>
+Image: <a class="tool-link" href="https://github.com/lh3/bwa" target="_blank">BWA</a><br>
 CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
 </div>
 
@@ -310,26 +340,30 @@ ls -lrth</pre>
 
 <p><strong>Explanation of parameters:</strong></p>
 <ul>
-<li><code>bwa index</code> — prepares the reference genome for alignment.</li>
-<li><code>-t 2</code> — uses 2 CPU threads.</li>
-<li><code>-R</code> — adds Read Group information (required for variant calling).</li>
-<li><code>-M</code> — marks shorter split hits as secondary.</li>
-<li><code>-o</code> — specifies the output SAM file.</li>
+<li><code>bwa index</code> — builds index for the reference genome.</li>
+<li><code>-t 2</code> — uses two CPU threads.</li>
+<li><code>-R</code> — adds Read Group metadata required for variant calling.</li>
+<li><code>-M</code> — marks split reads as secondary.</li>
+<li><code>-o</code> — specifies output SAM file.</li>
 </ul>
-
 </details>
 <!-- ================= STEP 5 ================= -->
 <details id="step5">
-<summary>Step 5 — BAM Processing (SAMtools)</summary>
+<summary>
+Step 5 — BAM Processing (
+<a class="tool-link" href="https://www.htslib.org/" target="_blank">SAMtools</a>
+)
+</summary>
 
 <p><strong>What this step does:</strong><br>
-Processes alignment files by converting SAM to BAM format, sorting reads,
-indexing the alignments, and generating mapping statistics.
+Processes alignment files by converting SAM to BAM format, sorting reads by genomic
+coordinates, indexing alignments, and generating mapping statistics.
 </p>
 
 <div class="note">
 <strong>ICE-Cloud container setup:</strong><br>
-Image: <a href="https://www.htslib.org/" target="_blank">SAMtools</a><br>
+Platform: <a class="tool-link" href="https://icecloud.in/home" target="_blank">ICE-Cloud</a><br>
+Image: <a class="tool-link" href="https://www.htslib.org/" target="_blank">SAMtools</a><br>
 CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
 </div>
 
@@ -347,27 +381,31 @@ ls -lrth</pre>
 <p><strong>Explanation of parameters:</strong></p>
 <ul>
 <li><code>view -S -b</code> — converts SAM to BAM format.</li>
-<li><code>sort</code> — sorts alignments by genomic coordinate.</li>
-<li><code>index</code> — creates BAM index (<code>.bai</code>).</li>
-<li><code>-F 4</code> — selects mapped reads only.</li>
-<li><code>-f 4</code> — selects unmapped reads only.</li>
+<li><code>sort</code> — sorts alignments by genomic coordinates.</li>
+<li><code>index</code> — creates BAM index file (<code>.bai</code>).</li>
+<li><code>-F 4</code> — selects mapped reads.</li>
+<li><code>-f 4</code> — selects unmapped reads.</li>
 <li><code>flagstat</code> — reports alignment statistics.</li>
 </ul>
-
 </details>
 
 <!-- ================= STEP 6 ================= -->
 <details id="step6">
-<summary>Step 6 — Variant Calling (BCFtools)</summary>
+<summary>
+Step 6 — Variant Calling (
+<a class="tool-link" href="https://samtools.github.io/bcftools/" target="_blank">BCFtools</a>
+)
+</summary>
 
 <p><strong>What this step does:</strong><br>
 Identifies single nucleotide variants (SNVs) and small insertions/deletions
-from the aligned reads and generates a Variant Call Format (VCF) file.
+from aligned reads and generates a Variant Call Format (VCF) file.
 </p>
 
 <div class="note">
 <strong>ICE-Cloud container setup:</strong><br>
-Image: <a href="https://samtools.github.io/bcftools/" target="_blank">BCFtools</a><br>
+Platform: <a class="tool-link" href="https://icecloud.in/home" target="_blank">ICE-Cloud</a><br>
+Image: <a class="tool-link" href="https://samtools.github.io/bcftools/" target="_blank">BCFtools</a><br>
 CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
 </div>
 
@@ -380,25 +418,29 @@ ls -lrth</pre>
 <ul>
 <li><code>mpileup</code> — summarizes base information at each genomic position.</li>
 <li><code>-f</code> — reference genome FASTA file.</li>
-<li><code>-Ou</code> — outputs uncompressed BCF for faster processing.</li>
-<li><code>call -mv</code> — calls both SNPs and indels.</li>
-<li><code>--ploidy 1</code> — SARS-CoV-2 is haploid.</li>
+<li><code>-Ou</code> — uncompressed BCF output.</li>
+<li><code>call -mv</code> — calls SNPs and indels.</li>
+<li><code>--ploidy 1</code> — SARS-CoV-2 genome is haploid.</li>
 </ul>
-
 </details>
 
 <!-- ================= STEP 7 ================= -->
 <details id="step7">
-<summary>Step 7 — Variant Annotation (SnpEff)</summary>
+<summary>
+Step 7 — Variant Annotation (
+<a class="tool-link" href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a>
+)
+</summary>
 
 <p><strong>What this step does:</strong><br>
-Annotates identified variants to predict their functional impact on genes
+Annotates detected variants to predict their functional impact on genes
 and proteins and generates summary statistics.
 </p>
 
 <div class="note">
 <strong>ICE-Cloud container setup:</strong><br>
-Image: <a href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a><br>
+Platform: <a class="tool-link" href="https://icecloud.in/home" target="_blank">ICE-Cloud</a><br>
+Image: <a class="tool-link" href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a><br>
 CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
 </div>
 
@@ -416,33 +458,33 @@ cat SRR15571424_ann.vcf | grep "LOW"</pre>
 
 <p><strong>Explanation of parameters:</strong></p>
 <ul>
-<li><code>buildDbNcbi.sh</code> — builds a SnpEff database from NCBI reference files.</li>
+<li><code>buildDbNcbi.sh</code> — builds SnpEff database from NCBI reference files.</li>
 <li><code>ann</code> — annotates variants in the VCF file.</li>
 <li><code>-csvStats</code> — generates CSV summary statistics.</li>
-<li><code>-htmlStats</code> — generates an interactive HTML report.</li>
-<li><code>grep</code> — quick filtering of variants by predicted impact.</li>
+<li><code>-htmlStats</code> — generates HTML summary report.</li>
+<li><code>grep</code> — filters variants by predicted impact.</li>
 </ul>
-
 </details>
 
 <!-- ================= DOCUMENTATION ================= -->
 <h2 id="docs">Tool Documentation & References</h2>
 
 <ul>
-<li><a href="https://github.com/ncbi/sra-tools" target="_blank">SRA Toolkit</a></li>
-<li><a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a></li>
-<li><a href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a></li>
-<li><a href="https://github.com/lh3/bwa" target="_blank">BWA</a></li>
-<li><a href="https://www.htslib.org/" target="_blank">SAMtools</a></li>
-<li><a href="https://samtools.github.io/bcftools/" target="_blank">BCFtools</a></li>
-<li><a href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a></li>
+<li><a class="tool-link" href="https://github.com/ncbi/sra-tools" target="_blank">SRA Toolkit</a></li>
+<li><a class="tool-link" href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a></li>
+<li><a class="tool-link" href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a></li>
+<li><a class="tool-link" href="https://github.com/lh3/bwa" target="_blank">BWA</a></li>
+<li><a class="tool-link" href="https://www.htslib.org/" target="_blank">SAMtools</a></li>
+<li><a class="tool-link" href="https://samtools.github.io/bcftools/" target="_blank">BCFtools</a></li>
+<li><a class="tool-link" href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a></li>
 </ul>
 
 <hr>
 
 <p><strong>End of Tutorial</strong><br>
 You have completed a full SARS-CoV-2 reference-based variant calling workflow
-on ICE-Cloud, from raw sequencing data to annotated variants.
+on <a class="tool-link" href="https://icecloud.in/home" target="_blank">ICE-Cloud</a>,
+from raw sequencing data to annotated variants.
 </p>
 
 </div> <!-- content -->
