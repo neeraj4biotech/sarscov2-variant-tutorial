@@ -1,507 +1,310 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>SARS-CoV-2 Variant Calling Tutorial — ICE-Cloud</title>
-  <style>
-    :root{--accent:#0b63a5;--muted:#6b7280;--bg:#ffffff;--mono:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}
-    body{font-family:Inter,ui-sans-serif,system-ui, -apple-system,Segoe UI,Roboto,Helvetica,Arial;line-height:1.6;color:#111;margin:0;background:var(--bg)}
-    header{background:#f8fafc;border-bottom:1px solid #e6eef6;padding:18px 24px;display:flex;align-items:center;gap:16px}
-    header h1{font-size:18px;margin:0;color:var(--accent)}
-    .container{display:flex;min-height:calc(100vh - 66px)}
-    nav{width:280px;border-right:1px solid #eef3f7;padding:20px 18px;background:#fbfdff;position:sticky;top:66px;align-self:flex-start;height:calc(100vh - 66px);overflow:auto}
-    nav h2{font-size:13px;margin:0 0 12px 0;color:#0f1724}
-    nav ul{list-style:none;padding:0;margin:0}
-    nav li{margin:6px 0}
-    nav a{color:#0b63a5;text-decoration:none;font-size:14px}
-    main{flex:1;padding:28px 36px;max-width:980px}
-    section{margin-bottom:32px}
-    h2.section-title{font-size:20px;margin:0 0 12px 0}
-    p.lead{color:var(--muted);margin-top:6px}
-    pre{background:#0b1220;color:#ecf2ff;padding:14px;border-radius:6px;overflow:auto;font-family:var(--mono);font-size:13px}
-    .cmd-wrap{position:relative;margin:12px 0}
-    .copy-btn{position:absolute;right:8px;top:8px;background:var(--accent);border:none;color:white;padding:6px 8px;border-radius:4px;cursor:pointer;font-size:12px}
-    .meta{background:#f1f6fb;border-left:4px solid var(--accent);padding:10px 12px;margin:12px 0;border-radius:4px}
-    .footnote{font-size:13px;color:var(--muted)}
-    a.external{color:var(--accent)}
-    .doc-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-    .card{border:1px solid #eef4fa;padding:10px;border-radius:6px;background:white}
-    .top-actions{display:flex;gap:8px;margin-left:auto}
-    .btn{background:var(--accent);color:white;border:none;padding:8px 10px;border-radius:6px;cursor:pointer}
-    .small{font-size:13px;padding:6px 8px}
-    .download{background:#2b6cb0}
-    footer{border-top:1px solid #eef3f7;padding:18px 36px;color:var(--muted);font-size:13px}
-    code.inline{background:#f3f6fb;padding:2px 6px;border-radius:4px;font-family:var(--mono)}
-    @media (max-width:800px){nav{display:none} .container{padding:0} main{padding:18px}}
-  .active-link { font-weight: bold; color: #083d7c !important; text-decoration: underline; }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SARS-CoV-2 Variant Calling Tutorial — ICE-Cloud</title>
+
+<!-- ==========================
+     GLOBAL STYLESHEET
+     Clean, simple, component-based
+     ========================== -->
+<style>
+:root {
+  --accent: #0b63a5;
+  --muted: #6b7280;
+  --bg: #ffffff;
+  --mono: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --header-height: 60px;
+}
+body {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: #111;
+  line-height: 1.6;
+}
+header {
+  background: #f8fafc;
+  padding: 15px 24px;
+  border-bottom: 1px solid #e6eef6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-height);
+}
+header h1 {
+  font-size: 18px;
+  margin: 0;
+  color: var(--accent);
+}
+.container {
+  display: flex;
+  min-height: calc(100vh - var(--header-height));
+}
+nav {
+  width: 260px;
+  background: #fbfdff;
+  border-right: 1px solid #eef3f7;
+  padding: 20px 16px;
+  position: sticky;
+  top: var(--header-height);
+  height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+}
+nav h2 {
+  font-size: 14px;
+  margin-top: 0;
+}
+nav ul {
+  list-style: none;
+  padding-left: 0;
+}
+nav ul li {
+  margin: 5px 0;
+}
+nav a {
+  text-decoration: none;
+  color: var(--accent);
+  font-size: 14px;
+}
+nav a.active-link {
+  text-decoration: underline;
+  font-weight: bold;
+}
+main {
+  flex: 1;
+  padding: 28px 36px;
+  max-width: 980px;
+}
+section {
+  margin-bottom: 40px;
+}
+h2.section-title {
+  margin-top: 0;
+  font-size: 20px;
+}
+p.lead {
+  color: var(--muted);
+  font-size: 15px;
+}
+/* Code Blocks */
+pre {
+  background: #0b1220;
+  color: #ecf2ff;
+  padding: 14px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 13px;
+  font-family: var(--mono);
+}
+.cmd-wrap {
+  position: relative;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.card {
+  border: 1px solid #e7edf4;
+  padding: 12px;
+  border-radius: 6px;
+  background: white;
+  margin: 12px 0;
+}
+footer {
+  border-top: 1px solid #eef3f7;
+  margin-top: 40px;
+  padding: 16px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+</style>
 </head>
+
 <body>
-  <header>
-    <h1>SARS-CoV-2 Variant Calling Tutorial — ICE-Cloud</h1>
-    <div class="top-actions">
-      <button class="btn small" id="downloadBtn">Download HTML</button>
-      <button class="btn small" id="printBtn">Print</button>
-    </div>
-  </header>
-  <div class="container">
-    <nav aria-label="Table of contents">
-      <h2>Contents</h2>
-      <ul>
-        <li><a href="#intro">Introduction</a></li>
-        <li><a href="#objective">Objective</a></li>
+<header>
+  <h1>SARS-CoV-2 Variant Calling Tutorial — ICE-Cloud</h1>
+  <button id="printBtn">Print</button>
+</header>
 
-        <li>
-          <strong>Step 1 — Data Preparation</strong>
-          <ul>
-            <li><a href="#step1-download">Download SRA Data</a></li>
-            <li><a href="#step1-fasterq">Convert to FASTQ</a></li>
-            <li><a href="#step1-gzip">Compress FASTQ</a></li>
-          </ul>
-        </li>
+<div class="container">
 
-        <li>
-          <strong>Step 2 — Quality Check (FastQC)</strong>
-          <ul>
-            <li><a href="#step2-run">Run FastQC</a></li>
-            <li><a href="#step2-output">View Output Reports</a></li>
-          </ul>
-        </li>
+  <!-- ==========================
+       LEFT SIDEBAR NAVIGATION
+       ========================== -->
+  <nav>
+    <h2>Contents</h2>
+    <ul>
+      <li><a href="#intro">Introduction</a></li>
+      <li><a href="#workflow">Workflow Diagram</a></li>
+      <li><a href="#objective">Objective</a></li>
+      <li><a href="#step1">Step 1 — Data Preparation</a></li>
+      <li><a href="#step2">Step 2 — Quality Check</a></li>
+      <li><a href="#step3">Step 3 — Read Trimming</a></li>
+      <li><a href="#step4">Step 4 — Alignment</a></li>
+      <li><a href="#step5">Step 5 — BAM Processing</a></li>
+      <li><a href="#step6">Step 6 — Variant Calling</a></li>
+      <li><a href="#step7">Step 7 — Annotation</a></li>
+      <li><a href="#references">Tool Documentation</a></li>
+      <li><a href="#end">End</a></li>
+    </ul>
+  </nav>
 
-        <li>
-          <strong>Step 3 — Read Trimming (Trim Galore)</strong>
-          <ul>
-            <li><a href="#step3-trim">Trim Reads</a></li>
-            <li><a href="#step3-output">Check Trimmed Files</a></li>
-          </ul>
-        </li>
+  <!-- ==========================
+       MAIN CONTENT
+       ========================== -->
+  <main>
 
-        <li>
-          <strong>Step 4 — Reference Alignment (BWA)</strong>
-          <ul>
-            <li><a href="#step4-index">Create Index</a></li>
-            <li><a href="#step4-mem">Run bwa mem</a></li>
-          </ul>
-        </li>
+    <!-- INTRODUCTION -->
+    <section id="intro">
+      <h2 class="section-title">Introduction</h2>
+      <p class="lead">This tutorial demonstrates a complete SARS-CoV-2 reference-based variant calling pipeline on ICE-Cloud using FastQC, Trim Galore, BWA, SAMtools, BCFtools, and SnpEff.</p>
+    </section>
 
-        <li>
-          <strong>Step 5 — BAM Processing (SAMtools)</strong>
-          <ul>
-            <li><a href="#step5-convert">SAM → BAM</a></li>
-            <li><a href="#step5-sort">Sorting</a></li>
-            <li><a href="#step5-index">Indexing</a></li>
-            <li><a href="#step5-mapped">Mapped / Unmapped</a></li>
-            <li><a href="#step5-flagstat">Flagstat Summary</a></li>
-          </ul>
-        </li>
+    <!-- WORKFLOW DIAGRAM -->
+    <section id="workflow">
+      <h2 class="section-title">Workflow Diagram</h2>
+      <p class="lead">A horizontal, icon-based overview of the variant calling pipeline.</p>
 
-        <li>
-          <strong>Step 6 — Variant Calling (BCFtools)</strong>
-          <ul>
-            <li><a href="#step6-mpileup">mpileup</a></li>
-            <li><a href="#step6-call">Variant Calling</a></li>
-          </ul>
-        </li>
+      <!-- CLEAN HORIZONTAL WORKFLOW SVG -->
+      <div style="text-align:center; margin: 20px 0;">
+        <!-- Icons and boxes diagram -->
+        <svg width="900" height="160" xmlns="http://www.w3.org/2000/svg">
+          <style>
+            .box { fill:#e8f1fb; stroke:#0b63a5; stroke-width:2; rx:8; ry:8; }
+            .t { font-size:14px; font-family:Arial; }
+            .arrow { stroke:#0b63a5; stroke-width:2; marker-end:url(#arrow); }
+          </style>
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="#0b63a5" />
+            </marker>
+          </defs>
 
-        <li>
-          <strong>Step 7 — Variant Annotation (SnpEff)</strong>
-          <ul>
-            <li><a href="#step7-build">Build Database</a></li>
-            <li><a href="#step7-annotate">Annotate VCF</a></li>
-            <li><a href="#step7-filter">Quick Filters</a></li>
-          </ul>
-        </li>
+          <!-- Steps Row -->
+          <g transform="translate(20,40)">
+            <rect x="0" y="0" width="100" height="50" class="box" />
+            <text x="50" y="22" text-anchor="middle" class="t">📥 Download</text>
 
-        <li><a href="#workflow">Workflow Diagram</a></li>
-        <li><a href="#references">Tool Documentation & Cross-References</a></li>
-        <li><a href="#end">End of Tutorial</a></li>
-      </ul>
-    </nav>
+            <line x1="100" y1="25" x2="130" y2="25" class="arrow" />
 
-    <main>
-      <section id="intro">
-        <h2 class="section-title">Introduction</h2>
-        <p class="lead">Next-generation sequencing (NGS) technology has transformed disease surveillance and diagnostics. This tutorial shows how to perform reference-based mapping and variant calling of SARS-CoV-2 data on <strong>ICE-Cloud</strong>, using common command-line tools. Each executable code block has a copy button for convenience.</p>
-      </section>
+            <rect x="130" y="0" width="100" height="50" class="box" />
+            <text x="180" y="22" text-anchor="middle" class="t">🔍 FastQC</text>
 
-      <section id="workflow">
-        <h2 class="section-title">Workflow Diagram</h2>
-        <p class="lead">A high-level overview of the SARS-CoV-2 variant calling pipeline.</p>
-        <div style="text-align:center; margin: 20px 0;">
-        <svg width="900" height="180" xmlns="http://www.w3.org/2000/svg">
-            <style>
-                .box { fill:#e8f1fb; stroke:#0b63a5; stroke-width:2; rx:8; ry:8; }
-                .text { font-family:Arial, sans-serif; font-size:14px; }
-                .arrow { stroke:#0b63a5; stroke-width:2; marker-end:url(#arrowhead); }
-            </style>
-            <defs>
-                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-                    <polygon points="0 0, 10 3.5, 0 7" fill="#0b63a5" />
-                </marker>
-            </defs>
+            <line x1="230" y1="25" x2="260" y2="25" class="arrow" />
 
-            <!-- Horizontal Workflow with Icons -->
-            <g transform="translate(10,20)">
-                <rect x="0" y="0" width="100" height="60" class="box"></rect>
-                <text x="50" y="25" text-anchor="middle" class="text">📥</text>
-                <text x="50" y="45" text-anchor="middle" class="text">Download</text>
+            <rect x="260" y="0" width="100" height="50" class="box" />
+            <text x="310" y="22" text-anchor="middle" class="t">✂️ Trim</text>
 
-                <line x1="100" y1="30" x2="130" y2="30" class="arrow"></line>
+            <line x1="360" y1="25" x2="390" y2="25" class="arrow" />
 
-                <rect x="130" y="0" width="100" height="60" class="box"></rect>
-                <text x="180" y="25" text-anchor="middle" class="text">🔍</text>
-                <text x="180" y="45" text-anchor="middle" class="text">FastQC</text>
+            <rect x="390" y="0" width="100" height="50" class="box" />
+            <text x="440" y="22" text-anchor="middle" class="t">🧬 BWA</text>
 
-                <line x1="230" y1="30" x2="260" y2="30" class="arrow"></line>
+            <line x1="490" y1="25" x2="520" y2="25" class="arrow" />
 
-                <rect x="260" y="0" width="100" height="60" class="box"></rect>
-                <text x="310" y="25" text-anchor="middle" class="text">✂️</text>
-                <text x="310" y="45" text-anchor="middle" class="text">Trim</text>
+            <rect x="520" y="0" width="100" height="50" class="box" />
+            <text x="570" y="22" text-anchor="middle" class="t">🧹 SAMtools</text>
 
-                <line x1="360" y1="30" x2="390" y2="30" class="arrow"></line>
+            <line x1="620" y1="25" x2="650" y2="25" class="arrow" />
 
-                <rect x="390" y="0" width="100" height="60" class="box"></rect>
-                <text x="440" y="25" text-anchor="middle" class="text">🧬</text>
-                <text x="440" y="45" text-anchor="middle" class="text">BWA</text>
+            <rect x="650" y="0" width="100" height="50" class="box" />
+            <text x="700" y="22" text-anchor="middle" class="t">🧪 BCFtools</text>
 
-                <line x1="490" y1="30" x2="520" y2="30" class="arrow"></line>
+            <line x1="750" y1="25" x2="780" y2="25" class="arrow" />
 
-                <rect x="520" y="0" width="100" height="60" class="box"></rect>
-                <text x="570" y="25" text-anchor="middle" class="text">🧹</text>
-                <text x="570" y="45" text-anchor="middle" class="text">SAMtools</text>
-
-                <line x1="620" y1="30" x2="650" y2="30" class="arrow"></line>
-
-                <rect x="650" y="0" width="100" height="60" class="box"></rect>
-                <text x="700" y="25" text-anchor="middle" class="text">🧪</text>
-                <text x="700" y="45" text-anchor="middle" class="text">BCFtools</text>
-
-                <line x1="750" y1="30" x2="780" y2="30" class="arrow"></line>
-
-                <rect x="780" y="0" width="100" height="60" class="box"></rect>
-                <text x="830" y="25" text-anchor="middle" class="text">🧠</text>
-                <text x="830" y="45" text-anchor="middle" class="text">SnpEff</text>
-            </g>
+            <rect x="780" y="0" width="100" height="50" class="box" />
+            <text x="830" y="22" text-anchor="middle" class="t">🧠 SnpEff</text>
+          </g>
         </svg>
-        </div>
-      </section>
+      </div>
+    </section>
 
-      
+    <!-- OBJECTIVE -->
+    <section id="objective">
+      <h2 class="section-title">Objective</h2>
+      <p>Perform data QC, trimming, mapping, variant calling, and annotation for SARS-CoV-2 using common bioinformatics tools on ICE-Cloud.</p>
+    </section>
 
-      <section id="objective">
-        <h2 class="section-title">Objective</h2>
-        <p>Perform quality assessment, trimming, alignment, variant calling, annotation, and basic interpretation of SARS-CoV-2 sequence data on ICE-cloud.</p>
-      </section>
+    <!-- ==========================
+         STEP 1
+         ========================== -->
+    <section id="step1">
+      <h2 class="section-title">Step 1 — Data Preparation</h2>
 
-      <section id="step1">
-  <h2 class="section-title">Step 1 — Data Preparation</h2>
+      <h3>Download SRA Data</h3>
+      <div class="cmd-wrap"><button class="copy-btn" data-target="cmd1">Copy</button>
+      <pre id="cmd1">prefetch SRR15571424</pre></div>
 
-  <h3 id="step1-download">Download SRA Data</h3>
-  <p class="meta">Use prefetch to download the SRA record.</p>
+      <h3>Convert to FASTQ</h3>
+      <div class="cmd-wrap"><button class="copy-btn" data-target="cmd2">Copy</button>
+      <pre id="cmd2">fasterq-dump SRR15571424 -S -e 2</pre></div>
 
-  <h3 id="step1-fasterq">Convert to FASTQ</h3>
-  <p class="meta">Use fasterq-dump to extract FASTQ files.</p>
+      <h3>Compress FASTQ</h3>
+      <div class="cmd-wrap"><button class="copy-btn" data-target="cmd3">Copy</button>
+      <pre id="cmd3">gzip SRR15571424_1.fastq
+gzip SRR15571424_2.fastq</pre></div>
+    </section>
 
-  <h3 id="step1-gzip">Compress FASTQ</h3>
-  <p class="meta">Gzip the resulting FASTQ files.</p>
+    <!-- ==========================
+         STEP 2
+         ========================== -->
+    <section id="step2">
+      <h2 class="section-title">Step 2 — Quality Check</h2>
 
-  <div class="card">
-    <strong>Commands</strong>
-    <div class="cmd-wrap">
-      <button class="copy-btn" data-target="cmd1">Copy</button>
-      <pre id="cmd1">prefetch SRR15571424
-fasterq-dump SRR15571424 -S -e 2
-gzip SRR15571424_1.fastq
-gzip SRR15571424_2.fastq</pre>
-    </div>
-    <p class="footnote">Notes: prefetch downloads the SRA file; fasterq-dump converts to FASTQ.</p>
-  </div>
-</section>
+      <h3>Run FastQC</h3>
+      <div class="cmd-wrap"><button class="copy-btn" data-target="cmd4">Copy</button>
+      <pre id="cmd4">fastqc *.fastq.gz --threads 4</pre></div>
+    </section>
 
-      <section id="step2">
-        <h2 class="section-title">Step 2 — Quality Check (FastQC)</h2>
-        <p class="meta">Launch a container with the <code class="inline">fastqc</code> image (2 CPU, 8 GB). Run FastQC on paired FASTQ files to get QC reports.</p>
+    <!-- ==========================
+         STEP 3
+         ========================== -->
+    <section id="step3">
+      <h2 class="section-title">Step 3 — Read Trimming</h2>
 
-        <div class="card">
-          <strong>Commands</strong>
-          <div class="cmd-wrap">
-            <button class="copy-btn" data-target="cmd2">Copy</button>
-            <pre id="cmd2">cp -r /drive/public/ICE_Workshop/AIC_CCMB/var_call_tutorial .
-cd var_call_tutorial
-fastqc --threads 5 SRR15571424_1.fastq.gz SRR15571424_2.fastq.gz
-ls -lrth</pre>
-          </div>
-          <p class="footnote">Tip: FastQC produces an HTML report for each FASTQ file — open it locally or via ICE file browser.</p>
-        </div>
-      </section>
+      <h3>Trim Reads</h3>
+      <div class="cmd-wrap"><button class="copy-btn" data-target="cmd5">Copy</button>
+      <pre id="cmd5">trim_galore --paired *.fastq.gz</pre></div>
+    </section>
 
-      <section id="step3">
-        <h2 class="section-title">Step 3 — Read Trimming (Trim Galore)</h2>
-        <p class="meta">Launch a <code class="inline">trim_galore</code> container and run paired-end trimming with FastQC on trimmed output.</p>
+    <!-- ==========================
+         STEP 4
+         ========================== -->
+    <section id="step4">
+      <h2 class="section-title">Step 4 — Reference Alignment (BWA)</h2>
 
-        <div class="card">
-          <strong>Commands</strong>
-          <div class="cmd-wrap">
-            <button class="copy-btn" data-target="cmd3">Copy</button>
-            <pre id="cmd3">cd var_call_tutorial
-trim_galore --fastqc --paired SRR15571424_1.fastq.gz SRR15571424_2.fastq.gz
-ls -lrth</pre>
-          </div>
-          <p class="footnote">Trim Galore wraps Cutadapt and FastQC. Inspect trimmed files which usually end with <code>_val_1.fq.gz</code> and <code>_val_2.fq.gz</code>.</p>
-        </div>
-      </section>
+      <h3>Create Index</h3>
+      <div class="cmd-wrap"><button class="copy-btn" data-target="cmd6">Copy</button>
+      <pre id="cmd6">bwa index MN908947.3.fna</pre></div>
 
-      <section id="step4">
-        <h2 class="section-title">Step 4 — Reference Alignment (BWA)</h2>
-        <p class="meta">Use <code class="inline">bwa</code> to index the SARS-CoV-2 reference and run <code>bwa mem</code> for paired-end alignment. Include read group (RG) tags for downstream tools.</p>
+      <h3>Run bwa mem</h3>
+      <div class="cmd-wrap"><button class="copy-btn" data-target="cmd7">Copy</button>
+      <pre id="cmd7">bwa mem MN908947.3.fna reads_1.fq.gz reads_2.fq.gz > aln.sam</pre></div>
+    </section>
 
-        <div class="card">
-          <strong>Commands</strong>
-          <div class="cmd-wrap">
-            <button class="copy-btn" data-target="cmd4">Copy</button>
-            <pre id="cmd4">cd var_call_tutorial
-bwa index MN908947.3.fna
-bwa mem -t 2 -R "@RG\tID:SRR15571424\tSM:SRR15571424\tPL:illumina\tLB:lib1\tPU:unit1" -V -M -o SRR15571424.sam MN908947.3.fna SRR15571424_1_val_1.fq.gz SRR15571424_2_val_2.fq.gz
-ls -lrth</pre>
-          </div>
-          <p class="footnote">Important: Use the trimmed FASTQ files as input. The <code>-R</code> string must escape tabs as shown.</p>
-        </div>
-      </section>
+    <!-- ==========================
+         STEP 5
+         ========================== -->
+    <section id="step5">
+      <h2 class="section-title">Step 5 — BAM Processing (SAMtools)</h2>
 
-      <section id="step5">
-        <h2 class="section-title">Step 5 — BAM Processing (SAMtools)</h2>
-        <p class="meta">Convert SAM → BAM, sort, index, and generate mapped/unmapped subsets and flagstat summary with <code class="inline">samtools</code>.</p>
+      <h3>SAM → BAM</h3>
+      <div class="cmd-wrap"><button class="copy-btn" data-target="cmd8">Copy</button>
+      <pre id="cmd8">samtools view -bS aln.sam > aln.bam</pre></div>
 
-        <div class="card">
-          <strong>Commands</strong>
-          <div class="cmd-wrap">
-            <button class="copy-btn" data-target="cmd5">Copy</button>
-            <pre id="cmd5">samtools view -S -b SRR15571424.sam -o SRR15571424.bam --threads 5
-samtools sort SRR15571424.bam -o SRR15571424_sorted.bam --threads 5
-samtools index SRR15571424_sorted.bam
-samtools view -b -F 4 SRR15571424_sorted.bam > SRR15571424_mapped.bam
-samtools view -b -f 4 SRR15571424_sorted.bam > SRR15571424_unmapped.bam
-samtools flagstat SRR15571424_sorted.bam
-ls -lrth</pre>
-          </div>
-          <p class="footnote">Note: Use adequate threads on the container. Keep final sorted BAM + index as result files.</p>
-        </div>
-      </section>
-
-      <section id="step6">
-        <h2 class="section-title">Step 6 — Variant Calling (BCFtools)</h2>
-        <p class="meta">Generate a BCF via <code class="inline">bcftools mpileup</code> and call variants with <code class="inline">bcftools call</code>. For SARS-CoV-2 set ploidy to 1 (haploid viral genome).</p>
-
-        <div class="card">
-          <strong>Commands</strong>
-          <div class="cmd-wrap">
-            <button class="copy-btn" data-target="cmd6">Copy</button>
-            <pre id="cmd6">bcftools mpileup -f MN908947.3.fna -Ou --threads 5 SRR15571424_sorted.bam -o SRR15571424.bcf
-bcftools call -mv -Ov --ploidy 1 --threads 2 SRR15571424.bcf -o SRR15571424.vcf
-ls -lrth</pre>
-          </div>
-          <p class="footnote">Tip: Consider additional filtering (QUAL, DP) depending on coverage and downstream needs.</p>
-        </div>
-      </section>
-
-      <section id="step7">
-        <h2 class="section-title">Step 7 — Variant Annotation (SnpEff)</h2>
-        <p class="meta">Build an annotation database (if needed) and annotate the VCF using <code class="inline">snpEff</code>. Produce CSV/HTML stats and an annotated VCF.</p>
-
-        <div class="card">
-          <strong>Commands</strong>
-          <div class="cmd-wrap">
-            <button class="copy-btn" data-target="cmd7">Copy</button>
-            <pre id="cmd7">/snpEff/scripts/buildDbNcbi.sh MN908947.3
-java -jar /snpEff/snpEff.jar ann -v MN908947.3 SRR15571424.vcf -csvStats SRR15571424_stat.csv -htmlStats SRR15571424_stat.html > SRR15571424_ann.vcf
-
-# quick filters
-cat SRR15571424_ann.vcf | grep "missense_variant"
-cat SRR15571424_ann.vcf | grep "MODERATE"
-cat SRR15571424_ann.vcf | grep "LOW"</pre>
-          </div>
-          <p class="footnote">SnpEff config and genome setup may require GFF/GTF annotations and FASTA files. Use pre-built databases when available.</p>
-        </div>
-      </section>
-
-      <section id="workflow">
-        <h2 class="section-title">Workflow Diagram</h2>
-        <p class="lead">The following diagram summarizes the SARS-CoV-2 Variant Calling Pipeline executed in this tutorial.</p>
-
-        <!-- Workflow SVG Diagram -->
-        <div style="text-align:center; margin: 20px 0;">
-        <svg width="420" height="780" xmlns="http://www.w3.org/2000/svg">
-            <style>
-                .box { fill:#e8f1fb; stroke:#0b63a5; stroke-width:2; rx:8; ry:8; }
-                .text { font-family:Arial, sans-serif; font-size:14px; }
-                .arrow { stroke:#0b63a5; stroke-width:2; marker-end:url(#arrowhead); }
-            </style>
-
-            <defs>
-                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-                    <polygon points="0 0, 10 3.5, 0 7" fill="#0b63a5" />
-                </marker>
-            </defs>
-
-            <!-- Step 1 -->
-            <rect x="60" y="20" width="300" height="60" class="box" />
-            <text x="210" y="55" text-anchor="middle" class="text">1. Download Data (SRA Toolkit)</text>
-
-            <line x1="210" y1="80" x2="210" y2="115" class="arrow" />
-
-            <!-- Step 2 -->
-            <rect x="60" y="120" width="300" height="60" class="box" />
-            <text x="210" y="155" text-anchor="middle" class="text">2. Quality Check (FastQC)</text>
-
-            <line x1="210" y1="180" x2="210" y2="215" class="arrow" />
-
-            <!-- Step 3 -->
-            <rect x="60" y="220" width="300" height="60" class="box" />
-            <text x="210" y="255" text-anchor="middle" class="text">3. Read Trimming (Trim Galore)</text>
-
-            <line x1="210" y1="280" x2="210" y2="315" class="arrow" />
-
-            <!-- Step 4 -->
-            <rect x="60" y="320" width="300" height="60" class="box" />
-            <text x="210" y="355" text-anchor="middle" class="text">4. Reference Indexing (BWA)</text>
-
-            <line x1="210" y1="380" x2="210" y2="415" class="arrow" />
-
-            <!-- Step 5 -->
-            <rect x="60" y="420" width="300" height="60" class="box" />
-            <text x="210" y="455" text-anchor="middle" class="text">5. Read Alignment (bwa mem)</text>
-
-            <line x1="210" y1="480" x2="210" y2="515" class="arrow" />
-
-            <!-- Step 6 -->
-            <rect x="60" y="520" width="300" height="60" class="box" />
-            <text x="210" y="555" text-anchor="middle" class="text">6. BAM Processing (SAMtools)</text>
-
-            <line x1="210" y1="580" x2="210" y2="615" class="arrow" />
-
-            <!-- Step 7 -->
-            <rect x="60" y="620" width="300" height="60" class="box" />
-            <text x="210" y="655" text-anchor="middle" class="text">7. Variant Calling (BCFtools)</text>
-
-            <line x1="210" y1="680" x2="210" y2="715" class="arrow" />
-
-            <!-- Step 8 -->
-            <rect x="60" y="720" width="300" height="60" class="box" />
-            <text x="210" y="755" text-anchor="middle" class="text">8. Variant Annotation (SnpEff)</text>
-        </svg>
-        </div>
-
-        <p class="footnote">This workflow represents a standard SARS-CoV-2 reference-based variant calling pipeline widely used in genomic surveillance.</p>
-      </section>
-
-      
-        <h2 class="section-title">Tool Documentation & Cross-References</h2>
-        <p class="lead">Official documentation and helpful cross-reference pages for each tool used in this tutorial.</p>
-
-        <div class="doc-links">
-          <div class="card">
-            <strong>SRA Toolkit (prefetch, fasterq-dump)</strong>
-            <p class="footnote"><a class="external" href="https://github.com/ncbi/sra-tools/wiki/08.-prefetch-and-fasterq-dump" target="_blank">SRA-Tools: prefetch & fasterq-dump (GitHub Wiki)</a></p>
-            <p class="footnote"><a class="external" href="https://www.ncbi.nlm.nih.gov/sra/docs/sradownload/" target="_blank">NCBI SRA Download guide</a></p>
-          </div>
-
-          <div class="card">
-            <strong>FastQC</strong>
-            <p class="footnote"><a class="external" href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC official page (Babraham)</a></p>
-          </div>
-
-          <div class="card">
-            <strong>Trim Galore!</strong>
-            <p class="footnote"><a class="external" href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore — User Guide</a></p>
-            <p class="footnote"><a class="external" href="https://github.com/FelixKrueger/TrimGalore" target="_blank">Trim Galore (GitHub)</a></p>
-          </div>
-
-          <div class="card">
-            <strong>BWA</strong>
-            <p class="footnote"><a class="external" href="https://bio-bwa.sourceforge.net/bwa.shtml" target="_blank">BWA manual page</a></p>
-            <p class="footnote"><a class="external" href="https://github.com/lh3/bwa" target="_blank">BWA (GitHub)</a></p>
-          </div>
-
-          <div class="card">
-            <strong>SAMtools & HTSlib</strong>
-            <p class="footnote"><a class="external" href="https://www.htslib.org/" target="_blank">HTSlib / Samtools documentation</a></p>
-          </div>
-
-          <div class="card">
-            <strong>BCFtools</strong>
-            <p class="footnote"><a class="external" href="https://samtools.github.io/bcftools/bcftools.html" target="_blank">BCFtools manual</a></p>
-            <p class="footnote"><a class="external" href="https://samtools.github.io/bcftools/howtos/variant-calling.html" target="_blank">BCFtools variant calling howto</a></p>
-          </div>
-
-          <div class="card">
-            <strong>SnpEff</strong>
-            <p class="footnote"><a class="external" href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff documentation & commands</a></p>
-            <p class="footnote"><a class="external" href="https://pcingola.github.io/SnpEff/snpeff/build_db/" target="_blank">SnpEff — Building databases</a></p>
-          </div>
-        </div>
-
-        <div class="meta" style="margin-top:14px">Tip: Click any tool link to open the official docs in a new tab. Use the copy buttons to paste commands directly into your ICE terminal.</div>
-      </section>
-
-      <section id="end">
-        <h2 class="section-title">End of Tutorial</h2>
-        <p class="lead">You now have a complete, copy-ready SARS-CoV-2 variant calling tutorial suitable for ICE-Cloud. Feel free to edit command examples, add additional filtering steps, or request a multi-sample workflow version.</p>
-      </section>
-
-      <footer>
-        <div>Created for ICE-Cloud users — includes copy-to-clipboard for executable commands and cross-references to official tool documentation.</div>
-      </footer>
-    </main>
-  </div>
-
-  <script>
-    // Copy buttons
-    document.querySelectorAll('.copy-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.getAttribute('data-target');
-        const text = document.getElementById(id).innerText;
-        try{
-          await navigator.clipboard.writeText(text);
-          btn.innerText = 'Copied';
-          setTimeout(()=> btn.innerText = 'Copy',1500);
-        }catch(e){
-          alert('Copy failed — select and copy manually.');
-        }
-      });
-    });
-
-    // Download HTML
-    document.getElementById('downloadBtn').addEventListener('click', ()=>{
-      const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'sarscov2_variant_calling_icecloud_tutorial.html';
-      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    });
-
-    // Print
-    document.getElementById('printBtn').addEventListener('click', ()=> window.print());
-  // Scroll-Spy for auto-highlight in sidebar
-    document.addEventListener('scroll', () => {
-      const sections = document.querySelectorAll('section[id]');
-      let scrollPos = window.scrollY + 120;
-
-      sections.forEach(sec => {
-        const top = sec.offsetTop;
-        const bottom = top + sec.offsetHeight;
-        const id = sec.getAttribute('id');
-        const link = document.querySelector(`nav a[href="#${id}"]`);
-
-        if (scrollPos >= top && scrollPos < bottom) {
-          if (link) link.classList.add('active-link');
-        } else {
-          if (link) link.classList.remove('active-link');
-        }
-      });
-    });
-
-  </script>
-</body>
-</html>
+      <h3>Sorting</h3>
+      <div class="cmd-wrap"><button class="
 
