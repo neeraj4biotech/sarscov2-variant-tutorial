@@ -1,1185 +1,135 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SARS-CoV-2 Variant Calling Tutorial — ICE-Cloud</title>
-
-<!-- ============================= -->
-<!--  PREMIUM DOC PORTAL UI (H2)    -->
-<!--  Dark/Light Mode + Lunr Search -->
-<!--  Prism Syntax Highlighting     -->
-<!-- ============================= -->
-
-<!-- Prism.js for syntax highlighting -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-
-<!-- Lunr.js for fuzzy search -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js"></script>
-
 <style>
-/* =============================
-   GLOBAL THEME + RESET
-   ============================= */
-:root {
-  --accent: #0b63a5;
-  --accent-dark: #083d7a;
-  --bg: #ffffff;
-  --text: #1a1a1a;
-  --muted: #6b7280;
-  --card-bg: #ffffff;
-  --border: #e6eef6;
-}
-[data-theme="dark"] {
-  --bg: #0a0f14;
-  --text: #e6edf3;
-  --card-bg: #111a21;
-  --border: #1f2a33;
-}
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Inter, system-ui, sans-serif;
-  line-height: 1.6;
-}
-
-/* =============================
-   HEADER (H2 DOC STYLE)
-   ============================= */
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 24px;
-  background: var(--card-bg);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-header .left-group {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-#searchBox {
-  padding: 7px 10px;
-  width: 280px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  color: var(--text);
-}
-.theme-toggle {
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: var(--accent);
-  color: white;
-}
-
-/* =============================
-   LAYOUT GRID
-   ============================= */
-.container {
-  display: grid;
-  grid-template-columns: 270px auto;
-  min-height: 100vh;
-}
-nav {
-  border-right: 1px solid var(--border);
-  background: var(--card-bg);
-  padding: 20px;
-  height: calc(100vh - 60px);
-  overflow-y: auto;
-  position: sticky;
-  top: 60px;
-}
-nav h3 {
-  margin: 10px 0;
-  cursor: pointer;
-  font-size: 15px;
-}
-nav ul {
-  list-style: none;
-  padding-left: 15px;
-  display: none;
-}
-nav ul li {
-  margin: 4px 0;
-}
-nav a {
-  text-decoration: none;
-  color: var(--accent);
-  font-size: 14px;
-}
-nav a.active-link {
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-main {
-  padding: 32px;
-  max-width: 1000px;
-}
-h2.section-title {
-  margin-top: 0;
-}
-.card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  padding: 12px;
-  border-radius: 6px;
-  margin: 12px 0;
-}
-.cmd-wrap {
-  position: relative;
-}
-.copy-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  padding: 4px 10px;
-  background: var(--accent);
-  border: none;
-  border-radius: 5px;
-  color: white;
-  cursor: pointer;
-}
-
-/* =============================
-   WORKFLOW DIAGRAM
-   ============================= */
-.workflow-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 20px 0;
-}
-.workflow-card {
-  padding: 12px 18px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--card-bg);
-  text-align: center;
-}
-.workflow-arrow {
-  font-size: 26px;
-  color: var(--accent);
-}
+body {font-family: Arial, sans-serif; margin: 0; padding: 0; line-height:1.6;}
+#sidebar {width: 260px; background:#f4f4f4; height:100vh; position:fixed; overflow:auto; padding:20px; border-right:1px solid #ccc;}
+#content {margin-left:280px; padding:30px;}
+h2 {color:#0b63a5; margin-top:40px;}
+.box {background:#e8f2ff; border-left:4px solid #0b63a5; padding:10px 14px; margin:12px 0; white-space:pre-line;}
+pre {background:#111827; color:#e5e7eb; padding:12px; border-radius:6px; overflow:auto;}
+.copy-btn {background:#0b63a5; color:white; border:none; padding:6px 10px; margin-bottom:6px; cursor:pointer; border-radius:4px;}
+.workflow {text-align:center; margin:20px 0;}
 </style>
 </head>
-
 <body>
-
-<!-- =============================
-     TOP HEADER (H2 STYLE)
-============================== -->
-<header>
-  <div class="left-group">
-    <img src="https://img.icons8.com/color/48/000000/coronavirus.png" width="32" />
-    <h2>SARS-CoV-2 Variant Calling Tutorial</h2>
-  </div>
-  <div class="right-group">
-    <input id="searchBox" placeholder="Search tutorial..." />
-    <button class="theme-toggle" id="themeToggle">🌙</button>
-  </div>
-</header>
-
-<div class="container">
-
-<!-- =============================
-     COLLAPSIBLE SIDEBAR (SB-1)
-============================== -->
-<nav>
-  <h3 data-target="intro-menu">Introduction</h3>
-  <ul id="intro-menu"><li><a href="#intro">Overview</a></li></ul>
-
-  <h3 data-target="wf-menu">Workflow Diagram</h3>
-  <ul id="wf-menu"><li><a href="#workflow">Pipeline Overview</a></li></ul>
-
-  <h3 data-target="step1-menu">Step 1 — Data Preparation</h3>
-  <ul id="step1-menu">
-    <li><a href="#step1-download">Download</a></li>
-    <li><a href="#step1-fq">FASTQ Conversion</a></li>
-    <li><a href="#step1-gzip">Compression</a></li>
-  </ul>
-
-  <h3 data-target="step2-menu">Step 2 — FastQC</h3>
-  <ul id="step2-menu"><li><a href="#step2">Run FastQC</a></li></ul>
-
-  <h3 data-target="step3-menu">Step 3 — Trimming</h3>
-  <ul id="step3-menu"><li><a href="#step3">Trim Reads</a></li></ul>
-
-  <h3 data-target="step4-menu">Step 4 — Alignment</h3>
-  <ul id="step4-menu">
-    <li><a href="#step4-index">Index Reference</a></li>
-    <li><a href="#step4-mem">bwa mem</a></li>
-  </ul>
-
-  <h3 data-target="step5-menu">Step 5 — BAM Processing</h3>
-  <ul id="step5-menu">
-    <li><a href="#step5-sam">SAM→BAM</a></li>
-    <li><a href="#step5-sort">Sorting</a></li>
-    <li><a href="#step5-index">Indexing</a></li>
-  </ul>
-
-  <h3 data-target="step6-menu">Step 6 — Variant Calling</h3>
-  <ul id="step6-menu">
-    <li><a href="#step6-mpileup">mpileup</a></li>
-    <li><a href="#step6-call">Call Variants</a></li>
-  </ul>
-
-  <h3 data-target="step7-menu">Step 7 — Annotation</h3>
-  <ul id="step7-menu">
-    <li><a href="#step7-build">Build DB</a></li>
-    <li><a href="#step7-ann">Annotate VCF</a></li>
-  </ul>
-
-  <h3 data-target="ref-menu">Documentation</h3>
-  <ul id="ref-menu">
-    <li><a href="#references">Tool Docs</a></li>
-  </ul>
-</nav>
-
-<!-- =============================
-     MAIN CONTENT
-============================== -->
-<main>
-<section id="intro">
-  <h2 class="section-title">Introduction</h2>
-  <p>This tutorial explains a complete SARS-CoV-2 variant calling workflow using FastQC, Trim Galore, BWA, SAMtools, BCFtools, and SnpEff.</p>
-</section>
-
-<section id="workflow">
-  <h2 class="section-title">Workflow Diagram</h2>
-  <div class="workflow-row">
-    <div class="workflow-card">📥<br>Download</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🔍<br>FastQC</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">✂️<br>Trim</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🧬<br>BWA</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🧹<br>SAMtools</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🧪<br>BCFtools</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🧠<br>SnpEff</div>
-  </div>
-</section>
-
-<section id="objective">
-  <h2 class="section-title">Objective</h2>
-  <p>Perform quality control, trimming, reference alignment, variant calling, and annotation for SARS-CoV-2.</p>
-</section>
-
-<!-- =============================
-     STEP 1
-============================== -->
-<section id="step1">
-  <h2 class="section-title">Step 1 — Data Preparation</h2>
-
-  <h3 id="step1-download">Download</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c1">Copy</button>
-  <pre id="c1"><code class="language-bash">prefetch SRR15571424</code></pre></div>
-
-  <h3 id="step1-fq">Convert to FASTQ</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c2">Copy</button>
-  <pre id="c2"><code class="language-bash">fasterq-dump SRR15571424 -S -e 2</code></pre></div>
-
-  <h3 id="step1-gzip">Compress FASTQ</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c3">Copy</button>
-  <pre id="c3"><code class="language-bash">gzip SRR15571424_1.fastq
-gzip SRR15571424_2.fastq</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 2
-============================== -->
-<section id="step2">
-  <h2 class="section-title">Step 2 — Quality Check (FastQC)</h2>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c4">Copy</button>
-  <pre id="c4"><code class="language-bash">fastqc *.fastq.gz --threads 4</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 3
-============================== -->
-<section id="step3">
-  <h2 class="section-title">Step 3 — Read Trimming</h2>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c5">Copy</button>
-  <pre id="c5"><code class="language-bash">trim_galore --paired *.fastq.gz</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 4
-============================== -->
-<section id="step4">
-  <h2 class="section-title">Step 4 — Alignment (BWA)</h2>
-
-  <h3 id="step4-index">Create Index</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c6">Copy</button>
-  <pre id="c6"><code class="language-bash">bwa index MN908947.3.fna</code></pre></div>
-
-  <h3 id="step4-mem">Run bwa mem</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c7">Copy</button>
-  <pre id="c7"><code class="language-bash">bwa mem MN908947.3.fna reads_1.fq.gz reads_2.fq.gz > aln.sam</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 5
-============================== -->
-<section id="step5">
-  <h2 class="section-title">Step 5 — BAM Processing (SAMtools)</h2>
-
-  <h3 id="step5-sam">SAM → BAM</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c8">Copy</button>
-  <pre id="c8"><code class="language-bash">samtools view -bS aln.sam > aln.bam</code></pre></div>
-
-  <h3 id="step5-sort">Sorting</h3>
-  <
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SARS-CoV-2 Variant Calling Tutorial — ICE-Cloud</title>
-
-<!-- ============================= -->
-<!--  PREMIUM DOC PORTAL UI (H2)    -->
-<!--  Dark/Light Mode + Lunr Search -->
-<!--  Prism Syntax Highlighting     -->
-<!-- ============================= -->
-
-<!-- Prism.js for syntax highlighting -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-
-<!-- Lunr.js for fuzzy search -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js"></script>
-
-<style>
-/* =============================
-   GLOBAL THEME + RESET
-   ============================= */
-:root {
-  --accent: #0b63a5;
-  --accent-dark: #083d7a;
-  --bg: #ffffff;
-  --text: #1a1a1a;
-  --muted: #6b7280;
-  --card-bg: #ffffff;
-  --border: #e6eef6;
-}
-[data-theme="dark"] {
-  --bg: #0a0f14;
-  --text: #e6edf3;
-  --card-bg: #111a21;
-  --border: #1f2a33;
-}
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Inter, system-ui, sans-serif;
-  line-height: 1.6;
-}
-
-/* =============================
-   HEADER (H2 DOC STYLE)
-   ============================= */
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 24px;
-  background: var(--card-bg);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-header .left-group {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-#searchBox {
-  padding: 7px 10px;
-  width: 280px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  color: var(--text);
-}
-.theme-toggle {
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: var(--accent);
-  color: white;
-}
-
-/* =============================
-   LAYOUT GRID
-   ============================= */
-.container {
-  display: grid;
-  grid-template-columns: 270px auto;
-  min-height: 100vh;
-}
-nav {
-  border-right: 1px solid var(--border);
-  background: var(--card-bg);
-  padding: 20px;
-  height: calc(100vh - 60px);
-  overflow-y: auto;
-  position: sticky;
-  top: 60px;
-}
-nav h3 {
-  margin: 10px 0;
-  cursor: pointer;
-  font-size: 15px;
-}
-nav ul {
-  list-style: none;
-  padding-left: 15px;
-  display: none;
-}
-nav ul li {
-  margin: 4px 0;
-}
-nav a {
-  text-decoration: none;
-  color: var(--accent);
-  font-size: 14px;
-}
-nav a.active-link {
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-main {
-  padding: 32px;
-  max-width: 1000px;
-}
-h2.section-title {
-  margin-top: 0;
-}
-.card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  padding: 12px;
-  border-radius: 6px;
-  margin: 12px 0;
-}
-.cmd-wrap {
-  position: relative;
-}
-.copy-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  padding: 4px 10px;
-  background: var(--accent);
-  border: none;
-  border-radius: 5px;
-  color: white;
-  cursor: pointer;
-}
-
-/* =============================
-   WORKFLOW DIAGRAM
-   ============================= */
-.workflow-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 20px 0;
-}
-.workflow-card {
-  padding: 12px 18px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--card-bg);
-  text-align: center;
-}
-.workflow-arrow {
-  font-size: 26px;
-  color: var(--accent);
-}
-</style>
-</head>
-
-<body>
-
-<!-- =============================
-     TOP HEADER (H2 STYLE)
-============================== -->
-<header>
-  <div class="left-group">
-    <img src="https://img.icons8.com/color/48/000000/coronavirus.png" width="32" />
-    <h2>SARS-CoV-2 Variant Calling Tutorial</h2>
-  </div>
-  <div class="right-group">
-    <input id="searchBox" placeholder="Search tutorial..." />
-    <button class="theme-toggle" id="themeToggle">🌙</button>
-  </div>
-</header>
-
-<div class="container">
-
-<!-- =============================
-     COLLAPSIBLE SIDEBAR (SB-1)
-============================== -->
-<nav>
-  <h3 data-target="intro-menu">Introduction</h3>
-  <ul id="intro-menu"><li><a href="#intro">Overview</a></li></ul>
-
-  <h3 data-target="wf-menu">Workflow Diagram</h3>
-  <ul id="wf-menu"><li><a href="#workflow">Pipeline Overview</a></li></ul>
-
-  <h3 data-target="step1-menu">Step 1 — Data Preparation</h3>
-  <ul id="step1-menu">
-    <li><a href="#step1-download">Download</a></li>
-    <li><a href="#step1-fq">FASTQ Conversion</a></li>
-    <li><a href="#step1-gzip">Compression</a></li>
-  </ul>
-
-  <h3 data-target="step2-menu">Step 2 — FastQC</h3>
-  <ul id="step2-menu"><li><a href="#step2">Run FastQC</a></li></ul>
-
-  <h3 data-target="step3-menu">Step 3 — Trimming</h3>
-  <ul id="step3-menu"><li><a href="#step3">Trim Reads</a></li></ul>
-
-  <h3 data-target="step4-menu">Step 4 — Alignment</h3>
-  <ul id="step4-menu">
-    <li><a href="#step4-index">Index Reference</a></li>
-    <li><a href="#step4-mem">bwa mem</a></li>
-  </ul>
-
-  <h3 data-target="step5-menu">Step 5 — BAM Processing</h3>
-  <ul id="step5-menu">
-    <li><a href="#step5-sam">SAM→BAM</a></li>
-    <li><a href="#step5-sort">Sorting</a></li>
-    <li><a href="#step5-index">Indexing</a></li>
-  </ul>
-
-  <h3 data-target="step6-menu">Step 6 — Variant Calling</h3>
-  <ul id="step6-menu">
-    <li><a href="#step6-mpileup">mpileup</a></li>
-    <li><a href="#step6-call">Call Variants</a></li>
-  </ul>
-
-  <h3 data-target="step7-menu">Step 7 — Annotation</h3>
-  <ul id="step7-menu">
-    <li><a href="#step7-build">Build DB</a></li>
-    <li><a href="#step7-ann">Annotate VCF</a></li>
-  </ul>
-
-  <h3 data-target="ref-menu">Documentation</h3>
-  <ul id="ref-menu">
-    <li><a href="#references">Tool Docs</a></li>
-  </ul>
-</nav>
-
-<!-- =============================
-     MAIN CONTENT
-============================== -->
-<main>
-<section id="intro">
-  <h2 class="section-title">Introduction</h2>
-  <p>This tutorial explains a complete SARS-CoV-2 variant calling workflow using FastQC, Trim Galore, BWA, SAMtools, BCFtools, and SnpEff.</p>
-</section>
-
-<section id="workflow">
-  <h2 class="section-title">Workflow Diagram</h2>
-  <div class="workflow-row">
-    <div class="workflow-card">📥<br>Download</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🔍<br>FastQC</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">✂️<br>Trim</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🧬<br>BWA</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🧹<br>SAMtools</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🧪<br>BCFtools</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🧠<br>SnpEff</div>
-  </div>
-</section>
-
-<section id="objective">
-  <h2 class="section-title">Objective</h2>
-  <p>Perform quality control, trimming, reference alignment, variant calling, and annotation for SARS-CoV-2.</p>
-</section>
-
-<!-- =============================
-     STEP 1
-============================== -->
-<section id="step1">
-  <h2 class="section-title">Step 1 — Data Preparation</h2>
-
-  <h3 id="step1-download">Download</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c1">Copy</button>
-  <pre id="c1"><code class="language-bash">prefetch SRR15571424</code></pre></div>
-
-  <h3 id="step1-fq">Convert to FASTQ</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c2">Copy</button>
-  <pre id="c2"><code class="language-bash">fasterq-dump SRR15571424 -S -e 2</code></pre></div>
-
-  <h3 id="step1-gzip">Compress FASTQ</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c3">Copy</button>
-  <pre id="c3"><code class="language-bash">gzip SRR15571424_1.fastq
-gzip SRR15571424_2.fastq</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 2
-============================== -->
-<section id="step2">
-  <h2 class="section-title">Step 2 — Quality Check (FastQC)</h2>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c4">Copy</button>
-  <pre id="c4"><code class="language-bash">fastqc *.fastq.gz --threads 4</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 3
-============================== -->
-<section id="step3">
-  <h2 class="section-title">Step 3 — Read Trimming</h2>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c5">Copy</button>
-  <pre id="c5"><code class="language-bash">trim_galore --paired *.fastq.gz</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 4
-============================== -->
-<section id="step4">
-  <h2 class="section-title">Step 4 — Alignment (BWA)</h2>
-
-  <h3 id="step4-index">Create Index</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c6">Copy</button>
-  <pre id="c6"><code class="language-bash">bwa index MN908947.3.fna</code></pre></div>
-
-  <h3 id="step4-mem">Run bwa mem</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c7">Copy</button>
-  <pre id="c7"><code class="language-bash">bwa mem MN908947.3.fna reads_1.fq.gz reads_2.fq.gz > aln.sam</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 5
-============================== -->
-<section id="step5">
-  <h2 class="section-title">Step 5 — BAM Processing (SAMtools)</h2>
-
-  <h3 id="step5-sam">SAM → BAM</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c8">Copy</button>
-  <pre id="c8"><code class="language-bash">samtools view -bS aln.sam > aln.bam</code></pre></div>
-
-  <h3 id="step5-sort">Sorting</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c9">Copy</button>
-  <pre id="c9"><code class="language-bash">samtools sort aln.bam -o aln.sorted.bam</code></pre></div>
-
-  <h3 id="step5-index">Indexing</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c10">Copy</button>
-  <pre id="c10"><code class="language-bash">samtools index aln.sorted.bam</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 6
-============================== -->
-<section id="step6">
-  <h2 class="section-title">Step 6 — Variant Calling (BCFtools)</h2>
-
-  <h3 id="step6-mpileup">mpileup</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c11">Copy</button>
-  <pre id="c11"><code class="language-bash">bcftools mpileup -f MN908947.3.fna aln.sorted.bam -Ou > raw.bcf</code></pre></div>
-
-  <h3 id="step6-call">Call Variants</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c12">Copy</button>
-  <pre id="c12"><code class="language-bash">bcftools call -mv -Ov --ploidy 1 raw.bcf > variants.vcf</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 7
-============================== -->
-<section id="step7">
-  <h2 class="section-title">Step 7 — Annotation (SnpEff)</h2>
-
-  <h3 id="step7-build">Build Database</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c13">Copy</button>
-  <pre id="c13"><code class="language-bash">/snpEff/scripts/buildDbNcbi.sh MN908947.3</code></pre></div>
-
-  <h3 id="step7-ann">Annotate VCF</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c14">Copy</button>
-  <pre id="c14"><code class="language-bash">java -jar snpEff.jar ann MN908947.3 variants.vcf > annotated.vcf</code></pre></div>
-
-</section>
-
-<!-- =============================
-     REFERENCES
-============================== -->
-<section id="references">
-  <h2 class="section-title">Tool Documentation & References</h2>
-  <ul>
-    <li><a href="https://github.com/ncbi/sra-tools" target="_blank">SRA Toolkit</a></li>
-    <li><a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a></li>
-    <li><a href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a></li>
-    <li><a href="https://github.com/lh3/bwa" target="_blank">BWA</a></li>
-    <li><a href="https://www.htslib.org/" target="_blank">SAMtools</a></li>
-    <li><a href="https://samtools.github.io/bcftools/" target="_blank">BCFtools</a></li>
-    <li><a href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a></li>
-  </ul>
-</section>
-
-<!-- =============================
-     END SECTION + FOOTER PLACEHOLDER
-============================== -->
-<section id="end">
-  <h2 class="section-title">End of Tutorial</h2>
-  <p>You have completed the SARS-CoV-2 Variant Calling Tutorial.</p>
-</section>
-
-<footer>
-  <p>Created for ICE-Cloud users.</p>
-</footer>
-
-<!-- JS placeholders for next step (theme toggle, copy, sidebar, search) -->
-<script>
-// Search Mode: SR-1 (minimal highlight)
-// Functions will be injected in next update.
-</script>
-
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SARS-CoV-2 Variant Calling Tutorial — ICE-Cloud</title>
-
-<!-- ============================= -->
-<!--  PREMIUM DOC PORTAL UI (H2)    -->
-<!--  Dark/Light Mode + Lunr Search -->
-<!--  Prism Syntax Highlighting     -->
-<!-- ============================= -->
-
-<!-- Prism.js for syntax highlighting -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-
-<!-- Lunr.js for fuzzy search -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js"></script>
-
-<style>
-/* =============================
-   GLOBAL THEME + RESET
-   ============================= */
-:root {
-  --accent: #0b63a5;
-  --accent-dark: #083d7a;
-  --bg: #ffffff;
-  --text: #1a1a1a;
-  --muted: #6b7280;
-  --card-bg: #ffffff;
-  --border: #e6eef6;
-}
-[data-theme="dark"] {
-  --bg: #0a0f14;
-  --text: #e6edf3;
-  --card-bg: #111a21;
-  --border: #1f2a33;
-}
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Inter, system-ui, sans-serif;
-  line-height: 1.6;
-}
-
-/* =============================
-   HEADER (H2 DOC STYLE)
-   ============================= */
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 24px;
-  background: var(--card-bg);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-header .left-group {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-#searchBox {
-  padding: 7px 10px;
-  width: 280px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg);
-  color: var(--text);
-}
-.theme-toggle {
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: var(--accent);
-  color: white;
-}
-
-/* =============================
-   LAYOUT GRID
-   ============================= */
-.container {
-  display: grid;
-  grid-template-columns: 270px auto;
-  min-height: 100vh;
-}
-nav {
-  border-right: 1px solid var(--border);
-  background: var(--card-bg);
-  padding: 20px;
-  height: calc(100vh - 60px);
-  overflow-y: auto;
-  position: sticky;
-  top: 60px;
-}
-nav h3 {
-  margin: 10px 0;
-  cursor: pointer;
-  font-size: 15px;
-}
-nav ul {
-  list-style: none;
-  padding-left: 15px;
-  display: none;
-}
-nav ul li {
-  margin: 4px 0;
-}
-nav a {
-  text-decoration: none;
-  color: var(--accent);
-  font-size: 14px;
-}
-nav a.active-link {
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-main {
-  padding: 32px;
-  max-width: 1000px;
-}
-h2.section-title {
-  margin-top: 0;
-}
-.card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  padding: 12px;
-  border-radius: 6px;
-  margin: 12px 0;
-}
-.cmd-wrap {
-  position: relative;
-}
-.copy-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  padding: 4px 10px;
-  background: var(--accent);
-  border: none;
-  border-radius: 5px;
-  color: white;
-  cursor: pointer;
-}
-
-/* =============================
-   WORKFLOW DIAGRAM
-   ============================= */
-.workflow-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 20px 0;
-}
-.workflow-card {
-  padding: 12px 18px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--card-bg);
-  text-align: center;
-}
-.workflow-arrow {
-  font-size: 26px;
-  color: var(--accent);
-}
-</style>
-</head>
-
-<body>
-
-<!-- =============================
-     TOP HEADER (H2 STYLE)
-============================== -->
-<header>
-  <div class="left-group">
-    <img src="https://img.icons8.com/color/48/000000/coronavirus.png" width="32" />
-    <h2>SARS-CoV-2 Variant Calling Tutorial</h2>
-  </div>
-  <div class="right-group">
-    <input id="searchBox" placeholder="Search tutorial..." />
-    <button class="theme-toggle" id="themeToggle">🌙</button>
-  </div>
-</header>
-
-<div class="container">
-
-<!-- =============================
-     COLLAPSIBLE SIDEBAR (SB-1)
-============================== -->
-<nav>
-  <h3 data-target="intro-menu">Introduction</h3>
-  <ul id="intro-menu"><li><a href="#intro">Overview</a></li></ul>
-
-  <h3 data-target="wf-menu">Workflow Diagram</h3>
-  <ul id="wf-menu"><li><a href="#workflow">Pipeline Overview</a></li></ul>
-
-  <h3 data-target="step1-menu">Step 1 — Data Preparation</h3>
-  <ul id="step1-menu">
-    <li><a href="#step1-download">Download</a></li>
-    <li><a href="#step1-fq">FASTQ Conversion</a></li>
-    <li><a href="#step1-gzip">Compression</a></li>
-  </ul>
-
-  <h3 data-target="step2-menu">Step 2 — FastQC</h3>
-  <ul id="step2-menu"><li><a href="#step2">Run FastQC</a></li></ul>
-
-  <h3 data-target="step3-menu">Step 3 — Trimming</h3>
-  <ul id="step3-menu"><li><a href="#step3">Trim Reads</a></li></ul>
-
-  <h3 data-target="step4-menu">Step 4 — Alignment</h3>
-  <ul id="step4-menu">
-    <li><a href="#step4-index">Index Reference</a></li>
-    <li><a href="#step4-mem">bwa mem</a></li>
-  </ul>
-
-  <h3 data-target="step5-menu">Step 5 — BAM Processing</h3>
-  <ul id="step5-menu">
-    <li><a href="#step5-sam">SAM→BAM</a></li>
-    <li><a href="#step5-sort">Sorting</a></li>
-    <li><a href="#step5-index">Indexing</a></li>
-  </ul>
-
-  <h3 data-target="step6-menu">Step 6 — Variant Calling</h3>
-  <ul id="step6-menu">
-    <li><a href="#step6-mpileup">mpileup</a></li>
-    <li><a href="#step6-call">Call Variants</a></li>
-  </ul>
-
-  <h3 data-target="step7-menu">Step 7 — Annotation</h3>
-  <ul id="step7-menu">
-    <li><a href="#step7-build">Build DB</a></li>
-    <li><a href="#step7-ann">Annotate VCF</a></li>
-  </ul>
-
-  <h3 data-target="ref-menu">Documentation</h3>
-  <ul id="ref-menu">
-    <li><a href="#references">Tool Docs</a></li>
-  </ul>
-</nav>
-
-<!-- =============================
-     MAIN CONTENT
-============================== -->
-<main>
-<section id="intro">
-  <h2 class="section-title">Introduction</h2>
-  <p>This tutorial explains a complete SARS-CoV-2 variant calling workflow using FastQC, Trim Galore, BWA, SAMtools, BCFtools, and SnpEff.</p>
-</section>
-
-<section id="workflow">
-  <h2 class="section-title">Workflow Diagram</h2>
-  <div class="workflow-row">
-    <div class="workflow-card">📥<br>Download</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🔍<br>FastQC</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">✂️<br>Trim</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🧬<br>BWA</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🧹<br>SAMtools</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🧪<br>BCFtools</div>
-    <div class="workflow-arrow">➜</div>
-    <div class="workflow-card">🧠<br>SnpEff</div>
-  </div>
-</section>
-
-<section id="objective">
-  <h2 class="section-title">Objective</h2>
-  <p>Perform quality control, trimming, reference alignment, variant calling, and annotation for SARS-CoV-2.</p>
-</section>
-
-<!-- =============================
-     STEP 1
-============================== -->
-<section id="step1">
-  <h2 class="section-title">Step 1 — Data Preparation</h2>
-
-  <h3 id="step1-download">Download</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c1">Copy</button>
-  <pre id="c1"><code class="language-bash">prefetch SRR15571424</code></pre></div>
-
-  <h3 id="step1-fq">Convert to FASTQ</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c2">Copy</button>
-  <pre id="c2"><code class="language-bash">fasterq-dump SRR15571424 -S -e 2</code></pre></div>
-
-  <h3 id="step1-gzip">Compress FASTQ</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c3">Copy</button>
-  <pre id="c3"><code class="language-bash">gzip SRR15571424_1.fastq
-gzip SRR15571424_2.fastq</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 2
-============================== -->
-<section id="step2">
-  <h2 class="section-title">Step 2 — Quality Check (FastQC)</h2>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c4">Copy</button>
-  <pre id="c4"><code class="language-bash">fastqc *.fastq.gz --threads 4</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 3
-============================== -->
-<section id="step3">
-  <h2 class="section-title">Step 3 — Read Trimming</h2>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c5">Copy</button>
-  <pre id="c5"><code class="language-bash">trim_galore --paired *.fastq.gz</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 4
-============================== -->
-<section id="step4">
-  <h2 class="section-title">Step 4 — Alignment (BWA)</h2>
-
-  <h3 id="step4-index">Create Index</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c6">Copy</button>
-  <pre id="c6"><code class="language-bash">bwa index MN908947.3.fna</code></pre></div>
-
-  <h3 id="step4-mem">Run bwa mem</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c7">Copy</button>
-  <pre id="c7"><code class="language-bash">bwa mem MN908947.3.fna reads_1.fq.gz reads_2.fq.gz > aln.sam</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 5
-============================== -->
-<section id="step5">
-  <h2 class="section-title">Step 5 — BAM Processing (SAMtools)</h2>
-
-  <h3 id="step5-sam">SAM → BAM</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c8">Copy</button>
-  <pre id="c8"><code class="language-bash">samtools view -bS aln.sam > aln.bam</code></pre></div>
-
-  <h3 id="step5-sort">Sorting</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c9">Copy</button>
-  <pre id="c9"><code class="language-bash">samtools sort aln.bam -o aln.sorted.bam</code></pre></div>
-
-  <h3 id="step5-index">Indexing</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c10">Copy</button>
-  <pre id="c10"><code class="language-bash">samtools index aln.sorted.bam</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 6
-============================== -->
-<section id="step6">
-  <h2 class="section-title">Step 6 — Variant Calling (BCFtools)</h2>
-
-  <h3 id="step6-mpileup">mpileup</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c11">Copy</button>
-  <pre id="c11"><code class="language-bash">bcftools mpileup -f MN908947.3.fna aln.sorted.bam -Ou > raw.bcf</code></pre></div>
-
-  <h3 id="step6-call">Call Variants</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c12">Copy</button>
-  <pre id="c12"><code class="language-bash">bcftools call -mv -Ov --ploidy 1 raw.bcf > variants.vcf</code></pre></div>
-</section>
-
-<!-- =============================
-     STEP 7
-============================== -->
-<section id="step7">
-  <h2 class="section-title">Step 7 — Annotation (SnpEff)</h2>
-
-  <h3 id="step7-build">Build Database</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c13">Copy</button>
-  <pre id="c13"><code class="language-bash">/snpEff/scripts/buildDbNcbi.sh MN908947.3</code></pre></div>
-
-  <h3 id="step7-ann">Annotate VCF</h3>
-  <div class="cmd-wrap"><button class="copy-btn" data-target="c14">Copy</button>
-  <pre id="c14"><code class="language-bash">java -jar snpEff.jar ann MN908947.3 variants.vcf > annotated.vcf</code></pre></div>
-
-</section>
-
-<!-- =============================
-     REFERENCES
-============================== -->
-<section id="references">
-  <h2 class="section-title">Tool Documentation & References</h2>
-  <ul>
-    <li><a href="https://github.com/ncbi/sra-tools" target="_blank">SRA Toolkit</a></li>
-    <li><a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a></li>
-    <li><a href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a></li>
-    <li><a href="https://github.com/lh3/bwa" target="_blank">BWA</a></li>
-    <li><a href="https://www.htslib.org/" target="_blank">SAMtools</a></li>
-    <li><a href="https://samtools.github.io/bcftools/" target="_blank">BCFtools</a></li>
-    <li><a href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a></li>
-  </ul>
-</section>
-
-<!-- =============================
-     END SECTION + FOOTER PLACEHOLDER
-============================== -->
-<section id="end">
-  <h2 class="section-title">End of Tutorial</h2>
-  <p>You have completed the SARS-CoV-2 Variant Calling Tutorial.</p>
-</section>
-
-<footer>
-  <p>Created for ICE-Cloud users.</p>
-</footer>
-
-<!-- JS placeholders for next step (theme toggle, copy, sidebar, search) -->
-<script>
-// ==== PREMIUM JAVASCRIPT LAYER (Dark/Light, Sidebar, ScrollSpy, Search SR-1, Copy Buttons) ====
-
-// Search Mode: SR-1 (minimal highlight)
-// Functions will be injected in next update.
-</script>
-
+<div id="sidebar">
+<h3>Contents</h3>
+<ul>
+<li><a href="#intro">Introduction</a></li>
+<li><a href="#objective">Objective</a></li>
+<li><a href="#step1">Step 1 — Data Preparation</a></li>
+<li><a href="#step2">Step 2 — FastQC</a></li>
+<li><a href="#step3">Step 3 — Trimming</a></li>
+<li><a href="#step4">Step 4 — Alignment</a></li>
+<li><a href="#step5">Step 5 — BAM Processing</a></li>
+<li><a href="#step6">Step 6 — Variant Calling</a></li>
+<li><a href="#step7">Step 7 — Annotation</a></li>
+<li><a href="#docs">Tool Documentation</a></li>
+</ul>
+</div>
+<div id="content">
+<h2 id="intro">Introduction</h2>
+<p>Next-generation sequencing (NGS) technology has transformed disease surveillance and diagnostics. A major application has been tracking emerging SARS-CoV-2 mutations that inform public health decisions. ICE-Cloud, developed by C-DAC Pune, enables high-throughput genomic workflows with unified data storage and compute access.</p>
+
+<h2>Workflow Diagram</h2>
+<div class="workflow">📥 ➜ 🔍 ➜ ✂️ ➜ 🧬 ➜ 🧹 ➜ 🧪 ➜ 🧠</div>
+
+<h2 id="objective">Objective</h2>
+<p>To perform reference-based mapping and variant calling of SARS-CoV-2 sequencing data using ICE-Cloud, including QC, trimming, alignment, variant calling, and annotation.</p>
+
+<h2 id="step1">Step 1 — Data Preparation</h2>
+<div class="box">Instructions to start ICE job container:
+Home → Images → Image Library → Search "sratoolkit"
+Memory Allocation: 8 GB
+CPU Allocation: 2
+Connect to terminal after the job is running.</div>
+
+<button class="copy-btn" onclick="copyText('cmd1')">Copy</button>
+<pre id="cmd1">prefetch SRR15571424
+fasterq-dump SRR15571424 -S -e 2
+gzip fastq/SRR15571424_1.fastq
+gzip fastq/SRR15571424_2.fastq</pre>
+
+<h2 id="step2">Step 2 — Quality Check (FastQC)</h2>
+<div class="box">Instructions:
+Start container: fastqc
+Memory: 8 GB
+CPU: 2</div>
+
+<button class="copy-btn" onclick="copyText('cmd2')">Copy</button>
+<pre id="cmd2">cp -r /drive/public/ICE_Workshop/AIC_CCMB/var_call_tutorial .
+cd var_call_tutorial
+fastqc --threads 5 SRR15571424_1.fastq.gz SRR15571424_2.fastq.gz
+ls -lrth</pre>
+
+<h2 id="step3">Step 3 — Read Trimming (Trim Galore)</h2>
+<div class="box">Start container: trim_galore
+Memory: 8 GB
+CPU: 2</div>
+
+<button class="copy-btn" onclick="copyText('cmd3')">Copy</button>
+<pre id="cmd3">cd var_call_tutorial
+trim_galore --fastqc --paired SRR15571424_1.fastq.gz SRR15571424_2.fastq.gz
+ls -lrth</pre>
+
+<h2 id="step4">Step 4 — Reference Alignment (BWA)</h2>
+<div class="box">Start container: bwa
+Memory: 8 GB
+CPU: 2</div>
+
+<button class="copy-btn" onclick="copyText('cmd4')">Copy</button>
+<pre id="cmd4">cd var_call_tutorial
+bwa index MN908947.3.fna
+bwa mem -t 2 -R "@RG	ID:SRR15571424	SM:SRR15571424	PL:illumina	LB:lib1	PU:unit1" -V -M -o SRR15571424.sam MN908947.3.fna SRR15571424_1_val_1.fq.gz SRR15571424_2_val_2.fq.gz
+ls -lrth</pre>
+
+<h2 id="step5">Step 5 — BAM Processing (SAMtools)</h2>
+<div class="box">Start container: samtools
+Memory: 8 GB
+CPU: 2</div>
+
+<button class="copy-btn" onclick="copyText('cmd5')">Copy</button>
+<pre id="cmd5">samtools view -S -b SRR15571424.sam -o SRR15571424.bam --threads 5
+samtools sort SRR15571424.bam -o SRR15571424_sorted.bam --threads 5
+samtools index SRR15571424_sorted.bam
+samtools view -b -F 4 SRR15571424_sorted.bam > SRR15571424_mapped.bam
+samtools view -b -f 4 SRR15571424_sorted.bam > SRR15571424_unmapped.bam
+samtools flagstat SRR15571424_sorted.bam
+ls -lrth</pre>
+
+<h2 id="step6">Step 6 — Variant Calling (BCFtools)</h2>
+<div class="box">Start container: bcftools
+Memory: 8 GB
+CPU: 2</div>
+
+<button class="copy-btn" onclick="copyText('cmd6')">Copy</button>
+<pre id="cmd6">bcftools mpileup -f MN908947.3.fna -Ou --threads 5 SRR15571424_sorted.bam -o SRR15571424.bcf
+bcftools call -mv -Ov --ploidy 1 --threads 2 SRR15571424.bcf -o SRR15571424.vcf
+ls -lrth</pre>
+
+<h2 id="step7">Step 7 — Variant Annotation (SnpEff)</h2>
+<div class="box">Start container: snpeff
+Memory: 8 GB
+CPU: 2</div>
+
+<button class="copy-btn" onclick="copyText('cmd7')">Copy</button>
+<pre id="cmd7">/snpEff/scripts/buildDbNcbi.sh MN908947.3
+java -jar /snpEff/snpEff.jar ann -v MN908947.3 SRR15571424.vcf -csvStats SRR15571424_stat.csv -htmlStats SRR15571424_stat.html > SRR15571424_ann.vcf
+
+cat SRR15571424_ann.vcf | grep "missense_variant"
+cat SRR15571424_ann.vcf | grep "MODERATE"
+cat SRR15571424_ann.vcf | grep "LOW"</pre>
+
+<h2 id="docs">Tool Documentation</h2>
+<ul>
+<li>SRA Toolkit — https://github.com/ncbi/sra-tools</li>
+<li>FastQC — https://www.bioinformatics.babraham.ac.uk/projects/fastqc/</li>
+<li>Trim Galore — https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/</li>
+<li>BWA — https://github.com/lh3/bwa</li>
+<li>SAMtools — https://www.htslib.org/</li>
+<li>BCF
 
