@@ -1,283 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SARS-CoV-2 Variant Calling Tutorial — ICE-Cloud</title>
 
-<!-- Prism.js Syntax Highlighting -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css"/>
-
 <style>
-/* -------- Base Layout -------- */
+/* ====== BASIC LAYOUT ====== */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    line-height: 1.6;
-    background: #ffffff;
-    transition: background 0.3s, color 0.3s;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.7;
+  background: #ffffff;
+  color: #111;
 }
+
 #sidebar {
-    width: 260px;
-    background:#f4f4f4;
-    height:100vh;
-    position:fixed;
-    overflow:auto;
-    padding:20px;
-    border-right:1px solid #ccc;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 270px;
+  height: 100vh;
+  overflow-y: auto;
+  background: #f5f7fa;
+  border-right: 1px solid #ddd;
+  padding: 20px;
 }
+
 #content {
-    margin-left:280px;
-    padding:32px;
-    max-width:900px;
+  margin-left: 290px;
+  padding: 30px;
+  max-width: 1100px;
 }
 
-/* -------- Headers -------- */
-h2 {
-    color:#0b63a5;
-    margin-top:40px;
+/* ====== TEXT ====== */
+h1 { color: #0b63a5; }
+h2 { color: #0b63a5; margin-top: 40px; }
+h3 { margin-top: 25px; }
+
+a { color: #0b63a5; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ====== BOXES ====== */
+.note {
+  background: #eef5ff;
+  border-left: 4px solid #0b63a5;
+  padding: 12px 16px;
+  margin: 15px 0;
 }
 
-/* -------- Code Cards (CB-CARD) -------- */
-.code-card {
-    border:1px solid #d0d7e2;
-    border-radius:8px;
-    padding:0;
-    margin:18px 0;
-    background:#f9fbff;
-}
-.code-card-header {
-    background:#e8f2ff;
-    padding:10px 14px;
-    border-bottom:1px solid #d0d7e2;
-    font-weight:bold;
-    color:#0b63a5;
-}
 pre {
-    margin:0;
-    padding:14px;
-    background:#111827;
-    color:#e5e7eb;
-    border-radius:0 0 8px 8px;
-    overflow:auto;
+  background: #0f172a;
+  color: #e5e7eb;
+  padding: 14px;
+  border-radius: 6px;
+  overflow-x: auto;
 }
+
+/* ====== COPY BUTTON ====== */
 .copy-btn {
-    float:right;
-    margin-top:-6px;
-    background:#0b63a5;
-    color:white;
-    padding:4px 10px;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:12px;
+  background: #0b63a5;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 6px;
 }
 
-/* -------- Workflow Diagram -------- */
-.workflow-diagram {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin:25px 0;
-    padding:18px;
-    border-radius:10px;
-    background:#eef6ff;
-    border:1px solid #c9defa;
-}
-.workflow-step {
-    text-align:center;
-    font-size:14px;
-    color:#0b63a5;
-    width:90px;
-}
-.workflow-step span {
-    font-size:30px;
-    display:block;
+/* ====== COLLAPSIBLE ====== */
+details {
+  background: #fafafa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 25px;
 }
 
-/* -------- Dark Mode -------- */
-.dark-mode {
-    background:#1d1f23;
-    color:#e5e5e5;
-}
-.dark-mode #sidebar {
-    background:#2a2c31;
-    color:white;
-    border-right:1px solid #444;
-}
-.dark-mode pre {
-    background:#0a0a0a;
-}
-.dark-mode .code-card {
-    background:#2f3238;
-    border-color:#555;
-}
-.dark-mode .code-card-header {
-    background:#3a3d45;
-    border-color:#555;
+summary {
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #0b63a5;
 }
 
-/* -------- Icon Box (for later use) -------- */
-.info-box {
-    padding:12px 14px;
-    border-left:4px solid #0b63a5;
-    background:#e8f2ff;
-    border-radius:4px;
-    margin:14px 0;
+/* ====== WORKFLOW ====== */
+.workflow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  font-size: 14px;
 }
 
-/* Remove icon box for Introduction & Objective */
-.no-box {
-    border:none !important;
-    background:none !important;
-    padding:0 !important;
+.wf-box {
+  background: #e8f1fb;
+  border: 1px solid #0b63a5;
+  padding: 10px 14px;
+  border-radius: 6px;
+  text-align: center;
+  min-width: 120px;
 }
+
+.arrow { font-size: 22px; }
+
+/* ====== SIDEBAR ====== */
+#sidebar ul { padding-left: 18px; }
+#sidebar li { margin: 8px 0; }
 </style>
 
+<script>
+function copyText(id) {
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text);
+}
+</script>
 </head>
+
 <body>
-<!-- ===================== SIDEBAR ===================== -->
+
+<!-- ================= SIDEBAR ================= -->
 <div id="sidebar">
-    <h3>Contents</h3>
-    <ul>
-        <li><a href="#intro">Introduction</a></li>
-        <li><a href="#objective">Objective</a></li>
-        <li><a href="#workflow">Workflow Diagram</a></li>
-
-        <li><a href="#step1">Step 1 — Data Preparation</a></li>
-        <li><a href="#step2">Step 2 — FastQC</a></li>
-        <li><a href="#step3">Step 3 — Trimming</a></li>
-        <li><a href="#step4">Step 4 — Alignment (BWA)</a></li>
-        <li><a href="#step5">Step 5 — BAM Processing</a></li>
-        <li><a href="#step6">Step 6 — Variant Calling</a></li>
-        <li><a href="#step7">Step 7 — Annotation</a></li>
-
-        <li><a href="#docs">Tool Documentation</a></li>
-    </ul>
+<h2>Contents</h2>
+<ul>
+  <li><a href="#intro">Introduction</a></li>
+  <li><a href="#workflow">Workflow Diagram</a></li>
+  <li><a href="#objective">Objective</a></li>
+  <li><a href="#step1">Step 1 — Data Preparation</a></li>
+  <li><a href="#step2">Step 2 — Quality Check</a></li>
+  <li><a href="#step3">Step 3 — Read Trimming</a></li>
+  <li><a href="#step4">Step 4 — Alignment</a></li>
+  <li><a href="#step5">Step 5 — BAM Processing</a></li>
+  <li><a href="#step6">Step 6 — Variant Calling</a></li>
+  <li><a href="#step7">Step 7 — Annotation</a></li>
+  <li><a href="#docs">Tool Documentation</a></li>
+</ul>
 </div>
 
-<!-- ===================== MAIN CONTENT ===================== -->
+<!-- ================= CONTENT ================= -->
 <div id="content">
 
-<!-- ===================== INTRODUCTION ===================== -->
-<h2 id="intro">Introduction</h2>
+<h1 id="intro">SARS-CoV-2 Variant Calling Pipeline on ICE-Cloud</h1>
 
 <p>
-Next-generation sequencing (NGS) technology has transformed research in disease surveillance 
-and diagnostics. A major application has been in tracking emerging mutations in the
-SARS-CoV-2 genome, which helps monitor viral evolution, transmissibility, vaccine
-effectiveness, and informs public health decisions. The combination of reference genomes,
-genome-specific primers, and standardized bioinformatics workflows has enabled rapid,
-high-throughput genomic analysis during the COVID-19 pandemic. However, limited access to
-bioinformatics resources and difficulties in authorized data sharing remain common hurdles.
-ICE-cloud, developed by the HPC-Medical and Bioinformatics group at C-DAC Pune, addresses
-these challenges by providing a unified platform for data storage, analysis, and sharing.
-This tutorial demonstrates the execution of a SARS-CoV-2 variant calling pipeline on ICE-cloud.
+Next-generation sequencing (NGS) technology has transformed research in disease surveillance
+and diagnostics. A major application has been tracking emerging mutations in the
+SARS-CoV-2 genome, which helps monitor viral evolution, transmissibility, vaccine effectiveness,
+and informs public health decisions.
 </p>
 
-<!-- ===================== OBJECTIVE ===================== -->
-<h2 id="objective">Objective</h2>
-<p class="no-box">
-To perform reference-based mapping and variant calling of SARS-CoV-2 sequencing data on ICE-Cloud, including QC, trimming, alignment, variant calling, annotation, and interpretation.
+<p>
+The combination of reference genomes, genome-specific primers, and standardized bioinformatics
+workflows enabled rapid, high-throughput genomic analysis during the COVID-19 pandemic.
+However, limited access to bioinformatics infrastructure and challenges in authorized data
+sharing remain common hurdles.
 </p>
 
-<!-- ===================== WORKFLOW DIAGRAM ===================== -->
+<p>
+ICE-Cloud, developed by the HPC-Medical and Bioinformatics group at <strong>C-DAC Pune</strong>,
+addresses these challenges by providing a unified platform for data storage, analysis,
+and sharing. This tutorial demonstrates a complete SARS-CoV-2 variant calling workflow
+executed on ICE-Cloud.
+</p>
+
 <h2 id="workflow">Workflow Diagram</h2>
 
-<div class="workflow-diagram">
-    <div class="workflow-step"><span>📥</span> Download</div>
-    <div class="workflow-step">➜</div>
-    <div class="workflow-step"><span>🔍</span> FastQC</div>
-    <div class="workflow-step">➜</div>
-    <div class="workflow-step"><span>✂️</span> Trim</div>
-    <div class="workflow-step">➜</div>
-    <div class="workflow-step"><span>🧬</span> BWA</div>
-    <div class="workflow-step">➜</div>
-    <div class="workflow-step"><span>🧹</span> SAMtools</div>
-    <div class="workflow-step">➜</div>
-    <div class="workflow-step"><span>🧪</span> BCFtools</div>
-    <div class="workflow-step">➜</div>
-    <div class="workflow-step"><span>🧠</span> SnpEff</div>
+<div class="workflow">
+  <div class="wf-box">📥<br>Download<br>SRA</div>
+  <div class="arrow">➜</div>
+  <div class="wf-box">🔍<br>FastQC</div>
+  <div class="arrow">➜</div>
+  <div class="wf-box">✂️<br>Trim Galore</div>
+  <div class="arrow">➜</div>
+  <div class="wf-box">🧬<br>BWA</div>
+  <div class="arrow">➜</div>
+  <div class="wf-box">🧹<br>SAMtools</div>
+  <div class="arrow">➜</div>
+  <div class="wf-box">🧪<br>BCFtools</div>
+  <div class="arrow">➜</div>
+  <div class="wf-box">🧠<br>SnpEff</div>
 </div>
 
-<hr>
+<h2 id="objective">Objective</h2>
 
-<!-- ===================== STEP 1 ===================== -->
-<h2 id="step1">Step 1 — Data Preparation</h2>
+<p>
+To perform reference-based mapping and variant calling of NGS data using ICE-Cloud,
+a high-performance computing platform designed for bioinformatics workflows.
+This tutorial guides users through data upload, quality assessment, read trimming,
+reference-based alignment, variant calling with annotation, and result interpretation.
+</p>
+<!-- ================= STEP 1 ================= -->
+<details id="step1">
+<summary>Step 1 — Data Preparation (SRA Toolkit)</summary>
 
-<div class="code-card">
-    <div class="code-card-header">
-        Start ICE Container → sratoolkit
-        <button class="copy-btn" onclick="copyText('cmd1')">Copy</button>
-    </div>
-<pre id="cmd1"><code class="language-bash">
-prefetch SRR15571424
+<p><strong>What this step does:</strong><br>
+Downloads raw sequencing data from the NCBI Sequence Read Archive (SRA) and converts it into FASTQ format suitable for downstream analysis.
+</p>
+
+<div class="note">
+<strong>ICE-Cloud container setup:</strong><br>
+Image: <a href="https://github.com/ncbi/sra-tools" target="_blank">SRA Toolkit</a><br>
+CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
+</div>
+
+<button class="copy-btn" onclick="copyText('cmd1')">Copy</button>
+<pre id="cmd1">prefetch SRR15571424
 fasterq-dump SRR15571424 -S -e 2
 gzip fastq/SRR15571424_1.fastq
-gzip fastq/SRR15571424_2.fastq
-</code></pre>
+gzip fastq/SRR15571424_2.fastq</pre>
+
+<p><strong>Explanation of commands:</strong></p>
+<ul>
+<li><code>prefetch</code> — downloads the SRA file from NCBI.</li>
+<li><code>fasterq-dump</code> — converts SRA format to FASTQ.</li>
+<li><code>-S</code> — outputs split (paired-end) FASTQ files.</li>
+<li><code>-e 2</code> — uses 2 CPU threads.</li>
+<li><code>gzip</code> — compresses FASTQ files to save storage.</li>
+</ul>
+
+</details>
+
+<!-- ================= STEP 2 ================= -->
+<details id="step2">
+<summary>Step 2 — Quality Check (FastQC)</summary>
+
+<p><strong>What this step does:</strong><br>
+Assesses the quality of raw sequencing reads, including base quality, GC content,
+sequence duplication, and adapter contamination.
+</p>
+
+<div class="note">
+<strong>ICE-Cloud container setup:</strong><br>
+Image: <a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a><br>
+CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
 </div>
 
-<!-- ===================== STEP 2 ===================== -->
-<h2 id="step2">Step 2 — FastQC</h2>
-
-<div class="code-card">
-    <div class="code-card-header">
-        Run FastQC
-        <button class="copy-btn" onclick="copyText('cmd2')">Copy</button>
-    </div>
-<pre id="cmd2"><code class="language-bash">
-cp -r /drive/public/ICE_Workshop/AIC_CCMB/var_call_tutorial .
+<button class="copy-btn" onclick="copyText('cmd2')">Copy</button>
+<pre id="cmd2">cp -r /drive/public/ICE_Workshop/AIC_CCMB/var_call_tutorial .
 cd var_call_tutorial
 fastqc --threads 5 SRR15571424_1.fastq.gz SRR15571424_2.fastq.gz
-ls -lrth
-</code></pre>
+ls -lrth</pre>
+
+<p><strong>Explanation of parameters:</strong></p>
+<ul>
+<li><code>--threads 5</code> — speeds up analysis using 5 CPU cores.</li>
+<li><code>*.fastq.gz</code> — paired-end compressed FASTQ files.</li>
+<li><code>ls -lrth</code> — lists generated FastQC HTML and ZIP reports.</li>
+</ul>
+
+</details>
+
+<!-- ================= STEP 3 ================= -->
+<details id="step3">
+<summary>Step 3 — Read Trimming (Trim Galore)</summary>
+
+<p><strong>What this step does:</strong><br>
+Removes adapter sequences and low-quality bases from reads to improve alignment accuracy
+and reduce false-positive variant calls.
+</p>
+
+<div class="note">
+<strong>ICE-Cloud container setup:</strong><br>
+Image: <a href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a><br>
+CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
 </div>
 
-<!-- ===================== STEP 3 ===================== -->
-<h2 id="step3">Step 3 — Read Trimming</h2>
-
-<div class="code-card">
-    <div class="code-card-header">
-        Run Trim Galore
-        <button class="copy-btn" onclick="copyText('cmd3')">Copy</button>
-    </div>
-<pre id="cmd3"><code class="language-bash">
-cd var_call_tutorial
+<button class="copy-btn" onclick="copyText('cmd3')">Copy</button>
+<pre id="cmd3">cd var_call_tutorial
 trim_galore --fastqc --paired SRR15571424_1.fastq.gz SRR15571424_2.fastq.gz
-ls -lrth
-</code></pre>
+ls -lrth</pre>
+
+<p><strong>Explanation of parameters:</strong></p>
+<ul>
+<li><code>--paired</code> — indicates paired-end sequencing data.</li>
+<li><code>--fastqc</code> — runs FastQC again on trimmed reads.</li>
+<li><code>_val_1.fq.gz / _val_2.fq.gz</code> — trimmed output files.</li>
+</ul>
+
+</details>
+
+<!-- ================= STEP 4 ================= -->
+<details id="step4">
+<summary>Step 4 — Reference Alignment (BWA)</summary>
+
+<p><strong>What this step does:</strong><br>
+Aligns trimmed sequencing reads to the SARS-CoV-2 reference genome to determine
+their genomic positions.
+</p>
+
+<div class="note">
+<strong>ICE-Cloud container setup:</strong><br>
+Image: <a href="https://github.com/lh3/bwa" target="_blank">BWA</a><br>
+CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
 </div>
 
-<!-- ===================== STEP 4 ===================== -->
-<h2 id="step4">Step 4 — Reference Alignment (BWA)</h2>
-
-<div class="code-card">
-    <div class="code-card-header">
-        Run BWA
-        <button class="copy-btn" onclick="copyText('cmd4')">Copy</button>
-    </div>
-<pre id="cmd4"><code class="language-bash">
-cd var_call_tutorial
+<button class="copy-btn" onclick="copyText('cmd4')">Copy</button>
+<pre id="cmd4">cd var_call_tutorial
 bwa index MN908947.3.fna
 
-bwa mem -t 2 -R "@RG\tID:SRR15571424\tSM:SRR15571424\tPL:illumina\tLB:lib1\tPU:unit1" \
-    -V -M -o SRR15571424.sam MN908947.3.fna \
-    SRR15571424_1_val_1.fq.gz SRR15571424_2_val_2.fq.gz
+bwa mem -t 2 \
+-R "@RG\tID:SRR15571424\tSM:SRR15571424\tPL:illumina\tLB:lib1\tPU:unit1" \
+-V -M \
+-o SRR15571424.sam \
+MN908947.3.fna \
+SRR15571424_1_val_1.fq.gz SRR15571424_2_val_2.fq.gz
 
-ls -lrth
-</code></pre>
+ls -lrth</pre>
+
+<p><strong>Explanation of parameters:</strong></p>
+<ul>
+<li><code>bwa index</code> — prepares the reference genome for alignment.</li>
+<li><code>-t 2</code> — uses 2 CPU threads.</li>
+<li><code>-R</code> — adds Read Group information (required for variant calling).</li>
+<li><code>-M</code> — marks shorter split hits as secondary.</li>
+<li><code>-o</code> — specifies the output SAM file.</li>
+</ul>
+
+</details>
+<!-- ================= STEP 5 ================= -->
+<details id="step5">
+<summary>Step 5 — BAM Processing (SAMtools)</summary>
+
+<p><strong>What this step does:</strong><br>
+Processes alignment files by converting SAM to BAM format, sorting reads,
+indexing the alignments, and generating mapping statistics.
+</p>
+
+<div class="note">
+<strong>ICE-Cloud container setup:</strong><br>
+Image: <a href="https://www.htslib.org/" target="_blank">SAMtools</a><br>
+CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
 </div>
 
-<!-- ===================== STEP 5 ===================== -->
-<h2 id="step5">Step 5 — BAM Processing (SAMtools)</h2>
-
-<div class="code-card">
-    <div class="code-card-header">
-        SAM → BAM → Sort → Index
-        <button class="copy-btn" onclick="copyText('cmd5')">Copy</button>
-    </div>
-<pre id="cmd5"><code class="language-bash">
-samtools view -S -b SRR15571424.sam -o SRR15571424.bam --threads 5
+<button class="copy-btn" onclick="copyText('cmd5')">Copy</button>
+<pre id="cmd5">samtools view -S -b SRR15571424.sam -o SRR15571424.bam --threads 5
 samtools sort SRR15571424.bam -o SRR15571424_sorted.bam --threads 5
 samtools index SRR15571424_sorted.bam
 
@@ -285,190 +342,110 @@ samtools view -b -F 4 SRR15571424_sorted.bam > SRR15571424_mapped.bam
 samtools view -b -f 4 SRR15571424_sorted.bam > SRR15571424_unmapped.bam
 
 samtools flagstat SRR15571424_sorted.bam
-ls -lrth
-</code></pre>
+ls -lrth</pre>
+
+<p><strong>Explanation of parameters:</strong></p>
+<ul>
+<li><code>view -S -b</code> — converts SAM to BAM format.</li>
+<li><code>sort</code> — sorts alignments by genomic coordinate.</li>
+<li><code>index</code> — creates BAM index (<code>.bai</code>).</li>
+<li><code>-F 4</code> — selects mapped reads only.</li>
+<li><code>-f 4</code> — selects unmapped reads only.</li>
+<li><code>flagstat</code> — reports alignment statistics.</li>
+</ul>
+
+</details>
+
+<!-- ================= STEP 6 ================= -->
+<details id="step6">
+<summary>Step 6 — Variant Calling (BCFtools)</summary>
+
+<p><strong>What this step does:</strong><br>
+Identifies single nucleotide variants (SNVs) and small insertions/deletions
+from the aligned reads and generates a Variant Call Format (VCF) file.
+</p>
+
+<div class="note">
+<strong>ICE-Cloud container setup:</strong><br>
+Image: <a href="https://samtools.github.io/bcftools/" target="_blank">BCFtools</a><br>
+CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
 </div>
 
-<!-- ===================== STEP 6 ===================== -->
-<h2 id="step6">Step 6 — Variant Calling (BCFtools)</h2>
+<button class="copy-btn" onclick="copyText('cmd6')">Copy</button>
+<pre id="cmd6">bcftools mpileup -f MN908947.3.fna -Ou --threads 5 SRR15571424_sorted.bam -o SRR15571424.bcf
+bcftools call -mv -Ov --ploidy 1 --threads 2 SRR15571424.bcf -o SRR15571424.vcf
+ls -lrth</pre>
 
-<div class="code-card">
-    <div class="code-card-header">
-        mpileup + call
-        <button class="copy-btn" onclick="copyText('cmd6')">Copy</button>
-    </div>
-<pre id="cmd6"><code class="language-bash">
-bcftools mpileup -f MN908947.3.fna -Ou --threads 5 \
-    SRR15571424_sorted.bam -o SRR15571424.bcf
+<p><strong>Explanation of parameters:</strong></p>
+<ul>
+<li><code>mpileup</code> — summarizes base information at each genomic position.</li>
+<li><code>-f</code> — reference genome FASTA file.</li>
+<li><code>-Ou</code> — outputs uncompressed BCF for faster processing.</li>
+<li><code>call -mv</code> — calls both SNPs and indels.</li>
+<li><code>--ploidy 1</code> — SARS-CoV-2 is haploid.</li>
+</ul>
 
-bcftools call -mv -Ov --ploidy 1 --threads 2 \
-    SRR15571424.bcf -o SRR15571424.vcf
+</details>
 
-ls -lrth
-</code></pre>
+<!-- ================= STEP 7 ================= -->
+<details id="step7">
+<summary>Step 7 — Variant Annotation (SnpEff)</summary>
+
+<p><strong>What this step does:</strong><br>
+Annotates identified variants to predict their functional impact on genes
+and proteins and generates summary statistics.
+</p>
+
+<div class="note">
+<strong>ICE-Cloud container setup:</strong><br>
+Image: <a href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a><br>
+CPU: 2 &nbsp; | &nbsp; Memory: 8 GB
 </div>
 
-<!-- ===================== STEP 7 ===================== -->
-<h2 id="step7">Step 7 — Annotation (SnpEff)</h2>
-
-<div class="code-card">
-    <div class="code-card-header">
-        SnpEff Annotation
-        <button class="copy-btn" onclick="copyText('cmd7')">Copy</button>
-    </div>
-<pre id="cmd7"><code class="language-bash">
-/snpEff/scripts/buildDbNcbi.sh MN908947.3
+<button class="copy-btn" onclick="copyText('cmd7')">Copy</button>
+<pre id="cmd7">/snpEff/scripts/buildDbNcbi.sh MN908947.3
 
 java -jar /snpEff/snpEff.jar ann -v MN908947.3 SRR15571424.vcf \
-    -csvStats SRR15571424_stat.csv \
-    -htmlStats SRR15571424_stat.html \
-    > SRR15571424_ann.vcf
+-csvStats SRR15571424_stat.csv \
+-htmlStats SRR15571424_stat.html \
+> SRR15571424_ann.vcf
 
-grep "missense_variant" SRR15571424_ann.vcf
-grep "MODERATE" SRR15571424_ann.vcf
-grep "LOW" SRR15571424_ann.vcf
-</code></pre>
-</div>
+cat SRR15571424_ann.vcf | grep "missense_variant"
+cat SRR15571424_ann.vcf | grep "MODERATE"
+cat SRR15571424_ann.vcf | grep "LOW"</pre>
 
-<!-- ===================== TOOL DOCUMENTATION ===================== -->
-<h2 id="docs">Tool Documentation</h2>
+<p><strong>Explanation of parameters:</strong></p>
 <ul>
-    <li><a href="https://github.com/ncbi/sra-tools" target="_blank">SRA Toolkit</a></li>
-    <li><a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a></li>
-    <li><a href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a></li>
-    <li><a href="https://github.com/lh3/bwa" target="_blank">BWA</a></li>
-    <li><a href="https://www.htslib.org/" target="_blank">SAMtools</a></li>
-    <li><a href="https://samtools.github.io/bcftools/" target="_blank">BCFtools</a></li>
-    <li><a href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a></li>
+<li><code>buildDbNcbi.sh</code> — builds a SnpEff database from NCBI reference files.</li>
+<li><code>ann</code> — annotates variants in the VCF file.</li>
+<li><code>-csvStats</code> — generates CSV summary statistics.</li>
+<li><code>-htmlStats</code> — generates an interactive HTML report.</li>
+<li><code>grep</code> — quick filtering of variants by predicted impact.</li>
+</ul>
+
+</details>
+
+<!-- ================= DOCUMENTATION ================= -->
+<h2 id="docs">Tool Documentation & References</h2>
+
+<ul>
+<li><a href="https://github.com/ncbi/sra-tools" target="_blank">SRA Toolkit</a></li>
+<li><a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a></li>
+<li><a href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a></li>
+<li><a href="https://github.com/lh3/bwa" target="_blank">BWA</a></li>
+<li><a href="https://www.htslib.org/" target="_blank">SAMtools</a></li>
+<li><a href="https://samtools.github.io/bcftools/" target="_blank">BCFtools</a></li>
+<li><a href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a></li>
 </ul>
 
 <hr>
-<p>End of Tutorial — Created for ICE-Cloud users.</p>
 
-</div><!-- end content -->
-<!-- ===================== FLOATING SEARCH BOX ===================== -->
-<div id="searchBox">
-    <input type="text" id="searchInput" placeholder="Search tutorial..." />
-</div>
+<p><strong>End of Tutorial</strong><br>
+You have completed a full SARS-CoV-2 reference-based variant calling workflow
+on ICE-Cloud, from raw sequencing data to annotated variants.
+</p>
 
-<!-- ===================== DARK MODE TOGGLE ===================== -->
-<button id="darkToggle" title="Toggle Dark Mode">🌙</button>
-
-<style>
-/* Floating Search */
-#searchBox {
-    position: fixed;
-    top: 15px;
-    right: 70px;
-    z-index: 2000;
-}
-#searchInput {
-    padding: 6px 12px;
-    border: 1px solid #aaa;
-    border-radius: 6px;
-    font-size: 14px;
-    width: 180px;
-}
-
-/* Dark Mode Button */
-#darkToggle {
-    position: fixed;
-    top: 15px;
-    right: 20px;
-    z-index: 2200;
-    background: #0b63a5;
-    color: white;
-    border: none;
-    padding: 7px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-/* Dark Mode */
-body.dark {
-    background: #111827;
-    color: #e5e7eb;
-}
-body.dark #sidebar {
-    background: #1f2937;
-    border-color: #374151;
-}
-body.dark pre {
-    background: #000;
-}
-body.dark .code-card {
-    background: #1f2937;
-    border-color: #2563eb;
-    color: white;
-}
-body.dark a { color: #60a5fa; }
-</style>
-
-<!-- ===================== INTERACTIVE JAVASCRIPT ===================== -->
-<script>
-// ====== Copy to Clipboard ======
-function copyText(id) {
-    const text = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(text);
-    alert("Copied!");
-}
-
-// ====== Dark Mode Toggle (DM-LIGHT) ======
-document.getElementById("darkToggle").addEventListener("click", () => {
-    document.body.classList.toggle("dark");
-});
-
-// ====== Smooth Scrolling ======
-document.querySelectorAll('#sidebar a').forEach(link => {
-    link.addEventListener("click", function(e){
-        e.preventDefault();
-        document.querySelector(this.getAttribute("href")).scrollIntoView({
-            behavior: "smooth"
-        });
-    });
-});
-
-// ====== Scroll Spy (Auto-highlight in sidebar) ======
-window.addEventListener("scroll", () => {
-    let scrollPos = window.scrollY + 140;
-    document.querySelectorAll("h2[id]").forEach(sec => {
-        let id = sec.getAttribute("id");
-        let link = document.querySelector(`#sidebar a[href="#${id}"]`);
-        if (!link) return;
-
-        if (scrollPos >= sec.offsetTop && scrollPos < sec.offsetTop + sec.offsetHeight) {
-            link.classList.add("active-section");
-        } else {
-            link.classList.remove("active-section");
-        }
-    });
-});
-
-// Highlight class
-const style = document.createElement("style");
-style.innerHTML = `
-#sidebar a.active-section {
-    font-weight: bold;
-    color: #0b63a5;
-    text-decoration: underline;
-}
-`;
-document.head.appendChild(style);
-
-// ====== Floating Search (highlight matching text) ======
-document.getElementById("searchInput").addEventListener("input", function(){
-    let q = this.value.toLowerCase();
-    document.querySelectorAll("#content p, #content li, #content pre").forEach(el => {
-        el.style.background = "";
-        if(q.length > 2 && el.innerText.toLowerCase().includes(q)){
-            el.style.background = "yellow";
-        }
-    });
-});
-
-// ====== Prism Syntax Highlighting ======
-Prism.highlightAll();
-</script>
+</div> <!-- content -->
 
 </body>
 </html>
