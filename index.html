@@ -5,350 +5,211 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>SARS-CoV-2 Variant Calling Tutorial — ICE-Cloud</title>
 
-<!-- Prism.js syntax highlighting -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+<!-- Prism.js Syntax Highlighting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css"/>
 
 <style>
-/* ---------------------------------------------------
-   GLOBAL THEME (DM-LIGHT default)
---------------------------------------------------- */
-:root {
-  --bg: #ffffff;
-  --text: #111;
-  --panel: #f4f4f4;
-  --card: #eef6ff;
-  --border: #d0d7de;
-  --accent: #0b63a5;
-  --code-bg: #1e1e1e;
-  --code-text: #eaeaea;
-}
-
-body.dark {
-  --bg: #0e1117;
-  --text: #e8e8e8;
-  --panel: #161b22;
-  --card: #1c2128;
-  --border: #30363d;
-  --accent: #58a6ff;
-  --code-bg: #000;
-  --code-text: #fff;
-}
-
-/* Reset */
+/* -------- Base Layout -------- */
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    line-height: 1.6;
+    background: #ffffff;
+    transition: background 0.3s, color 0.3s;
 }
-
-/* ---------------------------------------------------
-   HEADER (Sticky)
---------------------------------------------------- */
-header {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  background: var(--panel);
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-header h1 { font-size: 20px; color: var(--accent); margin: 0; }
-
-.top-buttons button {
-  padding: 6px 12px;
-  margin-left: 6px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  background: var(--accent);
-  color: white;
-}
-
-/* ---------------------------------------------------
-   SEARCH BAR (Floating)
---------------------------------------------------- */
-#search-box {
-  position: fixed;
-  top: 70px;
-  right: 20px;
-  width: 260px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-  background: var(--panel);
-  z-index: 999;
-}
-
-#search-box input {
-  width: 100%;
-  padding: 6px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--bg);
-  color: var(--text);
-}
-
-/* ---------------------------------------------------
-   SIDEBAR (Auto Sticky)
---------------------------------------------------- */
 #sidebar {
-  width: 260px;
-  background: var(--panel);
-  padding: 20px;
-  border-right: 1px solid var(--border);
-
-  /* auto-sticky behavior */
-  position: sticky;
-  top: 120px;
-  height: calc(100vh - 120px);
-  overflow-y: auto;
+    width: 260px;
+    background:#f4f4f4;
+    height:100vh;
+    position:fixed;
+    overflow:auto;
+    padding:20px;
+    border-right:1px solid #ccc;
 }
-
-#sidebar ul { list-style: none; padding: 0; }
-#sidebar li { margin: 8px 0; }
-#sidebar a {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-#sidebar a.active {
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-/* ---------------------------------------------------
-   CONTENT AREA
---------------------------------------------------- */
 #content {
-  margin-left: 300px;
-  padding: 30px;
-  max-width: 950px;
+    margin-left:280px;
+    padding:32px;
+    max-width:900px;
 }
 
-/* ---------------------------------------------------
-   CALLOUT BOXES (CBO-1)
---------------------------------------------------- */
-.callout {
-  border-left: 6px solid var(--accent);
-  background: var(--card);
-  padding: 14px 18px;
-  margin: 18px 0;
-  border-radius: 6px;
+/* -------- Headers -------- */
+h2 {
+    color:#0b63a5;
+    margin-top:40px;
 }
 
-.callout strong { color: var(--accent); }
-
-/* ---------------------------------------------------
-   COLLAPSIBLE STEP BLOCKS (C-CLOSED)
---------------------------------------------------- */
-.step-block {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  margin-bottom: 18px;
-  background: var(--card);
-}
-
-.step-header {
-  padding: 12px 16px;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-}
-
-.step-header:hover { background: var(--border); }
-
-.step-content {
-  display: none;
-  padding: 20px;
-}
-
-/* ---------------------------------------------------
-   CODE CARD (CB-CARD)
---------------------------------------------------- */
+/* -------- Code Cards (CB-CARD) -------- */
 .code-card {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 14px;
-  background: var(--code-bg);
-  color: var(--code-text);
-  margin: 12px 0;
-  position: relative;
+    border:1px solid #d0d7e2;
+    border-radius:8px;
+    padding:0;
+    margin:18px 0;
+    background:#f9fbff;
 }
-
+.code-card-header {
+    background:#e8f2ff;
+    padding:10px 14px;
+    border-bottom:1px solid #d0d7e2;
+    font-weight:bold;
+    color:#0b63a5;
+}
+pre {
+    margin:0;
+    padding:14px;
+    background:#111827;
+    color:#e5e7eb;
+    border-radius:0 0 8px 8px;
+    overflow:auto;
+}
 .copy-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  padding: 4px 8px;
-  font-size: 12px;
-  border-radius: 4px;
-  cursor: pointer;
+    float:right;
+    margin-top:-6px;
+    background:#0b63a5;
+    color:white;
+    padding:4px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:12px;
 }
 
-/* ---------------------------------------------------
-   WORKFLOW DIAGRAM (WF-A)
---------------------------------------------------- */
-.workflow {
-  text-align: center;
-  margin: 20px 0;
+/* -------- Workflow Diagram -------- */
+.workflow-diagram {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:25px 0;
+    padding:18px;
+    border-radius:10px;
+    background:#eef6ff;
+    border:1px solid #c9defa;
+}
+.workflow-step {
+    text-align:center;
+    font-size:14px;
+    color:#0b63a5;
+    width:90px;
+}
+.workflow-step span {
+    font-size:30px;
+    display:block;
 }
 
+/* -------- Dark Mode -------- */
+.dark-mode {
+    background:#1d1f23;
+    color:#e5e5e5;
+}
+.dark-mode #sidebar {
+    background:#2a2c31;
+    color:white;
+    border-right:1px solid #444;
+}
+.dark-mode pre {
+    background:#0a0a0a;
+}
+.dark-mode .code-card {
+    background:#2f3238;
+    border-color:#555;
+}
+.dark-mode .code-card-header {
+    background:#3a3d45;
+    border-color:#555;
+}
+
+/* -------- Icon Box (for later use) -------- */
+.info-box {
+    padding:12px 14px;
+    border-left:4px solid #0b63a5;
+    background:#e8f2ff;
+    border-radius:4px;
+    margin:14px 0;
+}
+
+/* Remove icon box for Introduction & Objective */
+.no-box {
+    border:none !important;
+    background:none !important;
+    padding:0 !important;
+}
 </style>
+
 </head>
 <body>
-<header>
-  <h1>SARS-CoV-2 Variant Calling Tutorial — ICE-Cloud</h1>
-  <div class="top-buttons">
-    <button onclick="downloadHTML()">Download</button>
-    <button onclick="window.print()">Print</button>
-    <button onclick="toggleDarkMode()">🌙</button>
-  </div>
-</header>
-
-<!-- Floating Search Box -->
-<div id="search-box">
-  <input type="text" id="searchInput" placeholder="Search tutorial..." onkeyup="performSearch()" />
-</div>
-
-<div style="display:flex;">
-<!-- ---------------------------------------------------
-     SIDEBAR
---------------------------------------------------- -->
+<!-- ===================== SIDEBAR ===================== -->
 <div id="sidebar">
-  <h3>Contents</h3>
-  <ul>
-    <li><a href="#intro">Introduction</a></li>
-    <li><a href="#workflow">Workflow Diagram</a></li>
-    <li><a href="#objective">Objective</a></li>
+    <h3>Contents</h3>
+    <ul>
+        <li><a href="#intro">Introduction</a></li>
+        <li><a href="#objective">Objective</a></li>
+        <li><a href="#workflow">Workflow Diagram</a></li>
 
-    <li><a href="#step1">Step 1 — Data Preparation</a></li>
-    <li><a href="#step2">Step 2 — FastQC</a></li>
-    <li><a href="#step3">Step 3 — Trimming</a></li>
-    <li><a href="#step4">Step 4 — Alignment</a></li>
-    <li><a href="#step5">Step 5 — BAM Processing</a></li>
-    <li><a href="#step6">Step 6 — Variant Calling</a></li>
-    <li><a href="#step7">Step 7 — Annotation</a></li>
+        <li><a href="#step1">Step 1 — Data Preparation</a></li>
+        <li><a href="#step2">Step 2 — FastQC</a></li>
+        <li><a href="#step3">Step 3 — Trimming</a></li>
+        <li><a href="#step4">Step 4 — Alignment (BWA)</a></li>
+        <li><a href="#step5">Step 5 — BAM Processing</a></li>
+        <li><a href="#step6">Step 6 — Variant Calling</a></li>
+        <li><a href="#step7">Step 7 — Annotation</a></li>
 
-    <li><a href="#docs">Tool Documentation</a></li>
-  </ul>
+        <li><a href="#docs">Tool Documentation</a></li>
+    </ul>
 </div>
 
-<!-- ---------------------------------------------------
-     MAIN CONTENT
---------------------------------------------------- -->
+<!-- ===================== MAIN CONTENT ===================== -->
 <div id="content">
 
-<!-- ---------------------------------------------------
-     INTRODUCTION
---------------------------------------------------- -->
+<!-- ===================== INTRODUCTION ===================== -->
 <h2 id="intro">Introduction</h2>
-<div class="callout">
-  🛈 <strong>Information</strong><br>
-  Next-generation sequencing (NGS) has transformed viral surveillance and diagnostics.  
-  SARS-CoV-2 variant tracking relies heavily on reference-based mapping and variant calling.
-  ICE-Cloud provides a unified HPC platform for running such workflows.
-</div>
 
-<!-- ---------------------------------------------------
-     WORKFLOW DIAGRAM
---------------------------------------------------- -->
+<p>
+Next-generation sequencing (NGS) technology has transformed research in disease surveillance 
+and diagnostics. A major application has been in tracking emerging mutations in the
+SARS-CoV-2 genome, which helps monitor viral evolution, transmissibility, vaccine
+effectiveness, and informs public health decisions. The combination of reference genomes,
+genome-specific primers, and standardized bioinformatics workflows has enabled rapid,
+high-throughput genomic analysis during the COVID-19 pandemic. However, limited access to
+bioinformatics resources and difficulties in authorized data sharing remain common hurdles.
+ICE-cloud, developed by the HPC-Medical and Bioinformatics group at C-DAC Pune, addresses
+these challenges by providing a unified platform for data storage, analysis, and sharing.
+This tutorial demonstrates the execution of a SARS-CoV-2 variant calling pipeline on ICE-cloud.
+</p>
+
+<!-- ===================== OBJECTIVE ===================== -->
+<h2 id="objective">Objective</h2>
+<p class="no-box">
+To perform reference-based mapping and variant calling of SARS-CoV-2 sequencing data on ICE-Cloud, including QC, trimming, alignment, variant calling, annotation, and interpretation.
+</p>
+
+<!-- ===================== WORKFLOW DIAGRAM ===================== -->
 <h2 id="workflow">Workflow Diagram</h2>
 
-<div class="workflow">
-<svg width="920" height="130">
-<style>
-.wbox { fill:#e3f0ff; stroke:#0b63a5; stroke-width:2; rx:10; }
-.wtext { font-size:14px; font-family:Arial; }
-.arrow { stroke:#0b63a5; stroke-width:2; marker-end:url(#arrow); }
-</style>
-
-<defs>
-<marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto">
-<polygon points="0 0, 10 5, 0 10" fill="#0b63a5"/>
-</marker>
-</defs>
-
-<g transform="translate(10,20)">
-
-  <!-- Download -->
-  <rect x="0" y="0" width="120" height="60" class="wbox"></rect>
-  <text x="60" y="25" text-anchor="middle" class="wtext">📥 Download</text>
-
-  <line x1="120" y1="30" x2="160" y2="30" class="arrow"/>
-
-  <!-- FastQC -->
-  <rect x="160" y="0" width="120" height="60" class="wbox"></rect>
-  <text x="220" y="25" text-anchor="middle" class="wtext">🔍 FastQC</text>
-
-  <line x1="280" y1="30" x2="320" y2="30" class="arrow"/>
-
-  <!-- Trim -->
-  <rect x="320" y="0" width="120" height="60" class="wbox"></rect>
-  <text x="380" y="25" text-anchor="middle" class="wtext">✂️ Trim</text>
-
-  <line x1="440" y1="30" x2="480" y2="30" class="arrow"/>
-
-  <!-- BWA -->
-  <rect x="480" y="0" width="120" height="60" class="wbox"></rect>
-  <text x="540" y="25" text-anchor="middle" class="wtext">🧬 BWA</text>
-
-  <line x1="600" y1="30" x2="640" y2="30" class="arrow"/>
-
-  <!-- SAMtools -->
-  <rect x="640" y="0" width="120" height="60" class="wbox"></rect>
-  <text x="700" y="25" text-anchor="middle" class="wtext">🧹 SAMtools</text>
-
-  <line x1="760" y1="30" x2="800" y2="30" class="arrow"/>
-
-  <!-- BCFtools -->
-  <rect x="800" y="0" width="120" height="60" class="wbox"></rect>
-  <text x="860" y="25" text-anchor="middle" class="wtext">🧪 BCFtools</text>
-
-  <line x1="920" y1="30" x2="960" y2="30" class="arrow"/>
-
-  <!-- SnpEff -->
-  <rect x="960" y="0" width="120" height="60" class="wbox"></rect>
-  <text x="1020" y="25" text-anchor="middle" class="wtext">🧠 SnpEff</text>
-
-</g>
-</svg>
+<div class="workflow-diagram">
+    <div class="workflow-step"><span>📥</span> Download</div>
+    <div class="workflow-step">➜</div>
+    <div class="workflow-step"><span>🔍</span> FastQC</div>
+    <div class="workflow-step">➜</div>
+    <div class="workflow-step"><span>✂️</span> Trim</div>
+    <div class="workflow-step">➜</div>
+    <div class="workflow-step"><span>🧬</span> BWA</div>
+    <div class="workflow-step">➜</div>
+    <div class="workflow-step"><span>🧹</span> SAMtools</div>
+    <div class="workflow-step">➜</div>
+    <div class="workflow-step"><span>🧪</span> BCFtools</div>
+    <div class="workflow-step">➜</div>
+    <div class="workflow-step"><span>🧠</span> SnpEff</div>
 </div>
 
-<!-- ---------------------------------------------------
-     OBJECTIVE
---------------------------------------------------- -->
-<h2 id="objective">Objective</h2>
-<div class="callout">
-  🛈 <strong>Information</strong><br>
-  This tutorial demonstrates reference-based mapping and variant calling of SARS-CoV-2 reads on ICE-Cloud.
-  Steps include QC, trimming, alignment, variant calling, annotation, and quick interpretation.
-</div>
+<hr>
 
-<!-- ---------------------------------------------------
-     STEP 1
---------------------------------------------------- -->
-<div id="step1" class="step-block">
-<div class="step-header">Step 1 — Data Preparation</div>
-<div class="step-content">
-
-<div class="callout">⚡ <strong>Run this command</strong><br>
-Start container: <b>sratoolkit</b> (CPU:2, RAM:8GB)
-</div>
+<!-- ===================== STEP 1 ===================== -->
+<h2 id="step1">Step 1 — Data Preparation</h2>
 
 <div class="code-card">
-<button class="copy-btn" data-copy="cmd1">Copy</button>
-<pre><code class="language-bash" id="cmd1">
+    <div class="code-card-header">
+        Start ICE Container → sratoolkit
+        <button class="copy-btn" onclick="copyText('cmd1')">Copy</button>
+    </div>
+<pre id="cmd1"><code class="language-bash">
 prefetch SRR15571424
 fasterq-dump SRR15571424 -S -e 2
 gzip fastq/SRR15571424_1.fastq
@@ -356,144 +217,112 @@ gzip fastq/SRR15571424_2.fastq
 </code></pre>
 </div>
 
-</div></div>
-
-<!-- ---------------------------------------------------
-     STEP 2
---------------------------------------------------- -->
-<div id="step2" class="step-block">
-<div class="step-header">Step 2 — Quality Check (FastQC)</div>
-<div class="step-content">
-
-<div class="callout">⚡ <strong>Run this command</strong><br>
-Start container: <b>fastqc</b> (CPU:2, RAM:8GB)
-</div>
+<!-- ===================== STEP 2 ===================== -->
+<h2 id="step2">Step 2 — FastQC</h2>
 
 <div class="code-card">
-<button class="copy-btn" data-copy="cmd2">Copy</button>
-<pre><code class="language-bash" id="cmd2">
-cp -r /drive/public/ICE_Workshop/AAIC/var_call_tutorial .
+    <div class="code-card-header">
+        Run FastQC
+        <button class="copy-btn" onclick="copyText('cmd2')">Copy</button>
+    </div>
+<pre id="cmd2"><code class="language-bash">
+cp -r /drive/public/ICE_Workshop/AIC_CCMB/var_call_tutorial .
 cd var_call_tutorial
 fastqc --threads 5 SRR15571424_1.fastq.gz SRR15571424_2.fastq.gz
 ls -lrth
 </code></pre>
 </div>
 
-</div></div>
-
-<!-- ---------------------------------------------------
-     STEP 3
---------------------------------------------------- -->
-<div id="step3" class="step-block">
-<div class="step-header">Step 3 — Read Trimming (Trim Galore)</div>
-<div class="step-content">
-
-<div class="callout">⚡ <strong>Run this command</strong><br>
-Start container: <b>trim_galore</b>
-</div>
+<!-- ===================== STEP 3 ===================== -->
+<h2 id="step3">Step 3 — Read Trimming</h2>
 
 <div class="code-card">
-<button class="copy-btn" data-copy="cmd3">Copy</button>
-<pre><code class="language-bash" id="cmd3">
+    <div class="code-card-header">
+        Run Trim Galore
+        <button class="copy-btn" onclick="copyText('cmd3')">Copy</button>
+    </div>
+<pre id="cmd3"><code class="language-bash">
 cd var_call_tutorial
 trim_galore --fastqc --paired SRR15571424_1.fastq.gz SRR15571424_2.fastq.gz
 ls -lrth
 </code></pre>
 </div>
 
-</div></div>
-
-<!-- ---------------------------------------------------
-     STEP 4
---------------------------------------------------- -->
-<div id="step4" class="step-block">
-<div class="step-header">Step 4 — Reference Alignment (BWA)</div>
-<div class="step-content">
-
-<div class="callout">⚡ <strong>Run this command</strong><br>
-Start container: <b>bwa</b>
-</div>
+<!-- ===================== STEP 4 ===================== -->
+<h2 id="step4">Step 4 — Reference Alignment (BWA)</h2>
 
 <div class="code-card">
-<button class="copy-btn" data-copy="cmd4">Copy</button>
-<pre><code class="language-bash" id="cmd4">
+    <div class="code-card-header">
+        Run BWA
+        <button class="copy-btn" onclick="copyText('cmd4')">Copy</button>
+    </div>
+<pre id="cmd4"><code class="language-bash">
 cd var_call_tutorial
 bwa index MN908947.3.fna
+
 bwa mem -t 2 -R "@RG\tID:SRR15571424\tSM:SRR15571424\tPL:illumina\tLB:lib1\tPU:unit1" \
-  -V -M -o SRR15571424.sam MN908947.3.fna \
-  SRR15571424_1_val_1.fq.gz SRR15571424_2_val_2.fq.gz
+    -V -M -o SRR15571424.sam MN908947.3.fna \
+    SRR15571424_1_val_1.fq.gz SRR15571424_2_val_2.fq.gz
+
 ls -lrth
 </code></pre>
 </div>
 
-</div></div>
-
-<!-- ---------------------------------------------------
-     STEP 5
---------------------------------------------------- -->
-<div id="step5" class="step-block">
-<div class="step-header">Step 5 — BAM Processing (SAMtools)</div>
-<div class="step-content">
-
-<div class="callout">⚡ <strong>Run this command</strong><br>
-Start container: <b>samtools</b>
-</div>
+<!-- ===================== STEP 5 ===================== -->
+<h2 id="step5">Step 5 — BAM Processing (SAMtools)</h2>
 
 <div class="code-card">
-<button class="copy-btn" data-copy="cmd5">Copy</button>
-<pre><code class="language-bash" id="cmd5">
+    <div class="code-card-header">
+        SAM → BAM → Sort → Index
+        <button class="copy-btn" onclick="copyText('cmd5')">Copy</button>
+    </div>
+<pre id="cmd5"><code class="language-bash">
 samtools view -S -b SRR15571424.sam -o SRR15571424.bam --threads 5
 samtools sort SRR15571424.bam -o SRR15571424_sorted.bam --threads 5
 samtools index SRR15571424_sorted.bam
+
 samtools view -b -F 4 SRR15571424_sorted.bam > SRR15571424_mapped.bam
 samtools view -b -f 4 SRR15571424_sorted.bam > SRR15571424_unmapped.bam
+
 samtools flagstat SRR15571424_sorted.bam
 ls -lrth
 </code></pre>
 </div>
 
-</div></div>
-
-<!-- ---------------------------------------------------
-     STEP 6
---------------------------------------------------- -->
-<div id="step6" class="step-block">
-<div class="step-header">Step 6 — Variant Calling (BCFtools)</div>
-<div class="step-content">
-
-<div class="callout">⚡ <strong>Run this command</strong><br>
-Start container: <b>bcftools</b>
-</div>
+<!-- ===================== STEP 6 ===================== -->
+<h2 id="step6">Step 6 — Variant Calling (BCFtools)</h2>
 
 <div class="code-card">
-<button class="copy-btn" data-copy="cmd6">Copy</button>
-<pre><code class="language-bash" id="cmd6">
-bcftools mpileup -f MN908947.3.fna -Ou --threads 5 SRR15571424_sorted.bam -o SRR15571424.bcf
-bcftools call -mv -Ov --ploidy 1 --threads 2 SRR15571424.bcf -o SRR15571424.vcf
+    <div class="code-card-header">
+        mpileup + call
+        <button class="copy-btn" onclick="copyText('cmd6')">Copy</button>
+    </div>
+<pre id="cmd6"><code class="language-bash">
+bcftools mpileup -f MN908947.3.fna -Ou --threads 5 \
+    SRR15571424_sorted.bam -o SRR15571424.bcf
+
+bcftools call -mv -Ov --ploidy 1 --threads 2 \
+    SRR15571424.bcf -o SRR15571424.vcf
+
 ls -lrth
 </code></pre>
 </div>
 
-</div></div>
-
-<!-- ---------------------------------------------------
-     STEP 7
---------------------------------------------------- -->
-<div id="step7" class="step-block">
-<div class="step-header">Step 7 — Variant Annotation (SnpEff)</div>
-<div class="step-content">
-
-<div class="callout">⚡ <strong>Run this command</strong><br>
-Start container: <b>snpeff</b>
-</div>
+<!-- ===================== STEP 7 ===================== -->
+<h2 id="step7">Step 7 — Annotation (SnpEff)</h2>
 
 <div class="code-card">
-<button class="copy-btn" data-copy="cmd7">Copy</button>
-<pre><code class="language-bash" id="cmd7">
+    <div class="code-card-header">
+        SnpEff Annotation
+        <button class="copy-btn" onclick="copyText('cmd7')">Copy</button>
+    </div>
+<pre id="cmd7"><code class="language-bash">
 /snpEff/scripts/buildDbNcbi.sh MN908947.3
+
 java -jar /snpEff/snpEff.jar ann -v MN908947.3 SRR15571424.vcf \
-  -csvStats SRR15571424_stat.csv -htmlStats SRR15571424_stat.html \
-  > SRR15571424_ann.vcf
+    -csvStats SRR15571424_stat.csv \
+    -htmlStats SRR15571424_stat.html \
+    > SRR15571424_ann.vcf
 
 grep "missense_variant" SRR15571424_ann.vcf
 grep "MODERATE" SRR15571424_ann.vcf
@@ -501,146 +330,144 @@ grep "LOW" SRR15571424_ann.vcf
 </code></pre>
 </div>
 
-</div></div>
-
-<!-- ---------------------------------------------------
-     TOOL DOCUMENTATION
---------------------------------------------------- -->
+<!-- ===================== TOOL DOCUMENTATION ===================== -->
 <h2 id="docs">Tool Documentation</h2>
-
 <ul>
-  <li><a href="https://github.com/ncbi/sra-tools" target="_blank">SRA Toolkit</a></li>
-  <li><a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a></li>
-  <li><a href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a></li>
-  <li><a href="https://github.com/lh3/bwa" target="_blank">BWA</a></li>
-  <li><a href="https://www.htslib.org/" target="_blank">SAMtools</a></li>
-  <li><a href="https://samtools.github.io/bcftools/bcftools.html" target="_blank">BCFtools</a></li>
-  <li><a href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a></li>
+    <li><a href="https://github.com/ncbi/sra-tools" target="_blank">SRA Toolkit</a></li>
+    <li><a href="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/" target="_blank">FastQC</a></li>
+    <li><a href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/" target="_blank">Trim Galore</a></li>
+    <li><a href="https://github.com/lh3/bwa" target="_blank">BWA</a></li>
+    <li><a href="https://www.htslib.org/" target="_blank">SAMtools</a></li>
+    <li><a href="https://samtools.github.io/bcftools/" target="_blank">BCFtools</a></li>
+    <li><a href="https://pcingola.github.io/SnpEff/" target="_blank">SnpEff</a></li>
 </ul>
 
-</div>
-</div>
-<!-- Prism.js Syntax Highlighter -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<hr>
+<p>End of Tutorial — Created for ICE-Cloud users.</p>
 
+</div><!-- end content -->
+<!-- ===================== FLOATING SEARCH BOX ===================== -->
+<div id="searchBox">
+    <input type="text" id="searchInput" placeholder="Search tutorial..." />
+</div>
+
+<!-- ===================== DARK MODE TOGGLE ===================== -->
+<button id="darkToggle" title="Toggle Dark Mode">🌙</button>
+
+<style>
+/* Floating Search */
+#searchBox {
+    position: fixed;
+    top: 15px;
+    right: 70px;
+    z-index: 2000;
+}
+#searchInput {
+    padding: 6px 12px;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 180px;
+}
+
+/* Dark Mode Button */
+#darkToggle {
+    position: fixed;
+    top: 15px;
+    right: 20px;
+    z-index: 2200;
+    background: #0b63a5;
+    color: white;
+    border: none;
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Dark Mode */
+body.dark {
+    background: #111827;
+    color: #e5e7eb;
+}
+body.dark #sidebar {
+    background: #1f2937;
+    border-color: #374151;
+}
+body.dark pre {
+    background: #000;
+}
+body.dark .code-card {
+    background: #1f2937;
+    border-color: #2563eb;
+    color: white;
+}
+body.dark a { color: #60a5fa; }
+</style>
+
+<!-- ===================== INTERACTIVE JAVASCRIPT ===================== -->
 <script>
-/* ----------------------------------------------
-   1. COLLAPSIBLE STEP BLOCKS
------------------------------------------------ */
-document.querySelectorAll(".step-header").forEach(header => {
-  header.addEventListener("click", () => {
-    const content = header.nextElementSibling;
-    content.style.display = content.style.display === "block" ? "none" : "block";
-    header.classList.toggle("open");
-  });
+// ====== Copy to Clipboard ======
+function copyText(id) {
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text);
+    alert("Copied!");
+}
+
+// ====== Dark Mode Toggle (DM-LIGHT) ======
+document.getElementById("darkToggle").addEventListener("click", () => {
+    document.body.classList.toggle("dark");
 });
 
-/* Start all steps collapsed (C-CLOSED) */
-document.querySelectorAll(".step-content").forEach(sec => {
-  sec.style.display = "none";
-});
-
-/* ----------------------------------------------
-   2. COPY TO CLIPBOARD BUTTONS
------------------------------------------------ */
-document.querySelectorAll(".copy-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    let targetId = btn.getAttribute("data-copy");
-    let codeEl = document.getElementById(targetId);
-    navigator.clipboard.writeText(codeEl.innerText.trim());
-    btn.innerText = "Copied!";
-    setTimeout(() => (btn.innerText = "Copy"), 1200);
-  });
-});
-
-/* ----------------------------------------------
-   3. DARK MODE TOGGLE (DM-LIGHT)
------------------------------------------------ */
-function toggleDarkMode() {
-  document.body.classList.toggle("dark-mode");
-  localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
-}
-
-/* Load preference */
-if (localStorage.getItem("darkMode") === "true") {
-  document.body.classList.add("dark-mode");
-}
-
-/* ----------------------------------------------
-   4. SCROLL SPY — Highlight Sidebar Item
------------------------------------------------ */
-const sections = document.querySelectorAll("h2, .step-block");
-const navLinks = document.querySelectorAll("#sidebar a");
-
-function onScroll() {
-  let scrollPos = window.scrollY + 120;
-
-  sections.forEach(sec => {
-    if (sec.offsetTop <= scrollPos && sec.offsetTop + sec.offsetHeight > scrollPos) {
-      navLinks.forEach(a => a.classList.remove("active"));
-      let id = sec.getAttribute("id");
-      let activeLink = document.querySelector(`#sidebar a[href="#${id}"]`);
-      if (activeLink) activeLink.classList.add("active");
-    }
-  });
-}
-
-window.addEventListener("scroll", onScroll);
-
-/* ----------------------------------------------
-   5. SEARCH FUNCTION
------------------------------------------------ */
-function performSearch() {
-  let term = document.getElementById("searchInput").value.toLowerCase();
-  let content = document.getElementById("content");
-
-  content.querySelectorAll("mark").forEach(m => m.replaceWith(m.innerText));
-
-  if (term.trim() === "") return;
-
-  let walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
-  let node;
-
-  while ((node = walker.nextNode())) {
-    let val = node.nodeValue.toLowerCase();
-    if (val.includes(term)) {
-      let span = document.createElement("span");
-      span.innerHTML = node.nodeValue.replace(
-        new RegExp(term, "gi"),
-        match => `<mark>${match}</mark>`
-      );
-      node.replaceWith(span);
-    }
-  }
-}
-
-/* ----------------------------------------------
-   6. DOWNLOAD HTML BUTTON
------------------------------------------------ */
-function downloadHTML() {
-  let html = document.documentElement.outerHTML;
-  let blob = new Blob([html], { type: "text/html" });
-  let a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "sarscov2_variant_tutorial.html";
-  a.click();
-}
-
-/* ----------------------------------------------
-   7. FIX ANCHOR OFFSET (HEADER HEIGHT)
------------------------------------------------ */
+// ====== Smooth Scrolling ======
 document.querySelectorAll('#sidebar a').forEach(link => {
-  link.addEventListener('click', e => {
-    e.preventDefault();
-    const target = document.querySelector(link.getAttribute("href"));
-    const yOffset = -70; // header height
-
-    const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
-
-    window.scrollTo({ top: y, behavior: "smooth" });
-  });
+    link.addEventListener("click", function(e){
+        e.preventDefault();
+        document.querySelector(this.getAttribute("href")).scrollIntoView({
+            behavior: "smooth"
+        });
+    });
 });
+
+// ====== Scroll Spy (Auto-highlight in sidebar) ======
+window.addEventListener("scroll", () => {
+    let scrollPos = window.scrollY + 140;
+    document.querySelectorAll("h2[id]").forEach(sec => {
+        let id = sec.getAttribute("id");
+        let link = document.querySelector(`#sidebar a[href="#${id}"]`);
+        if (!link) return;
+
+        if (scrollPos >= sec.offsetTop && scrollPos < sec.offsetTop + sec.offsetHeight) {
+            link.classList.add("active-section");
+        } else {
+            link.classList.remove("active-section");
+        }
+    });
+});
+
+// Highlight class
+const style = document.createElement("style");
+style.innerHTML = `
+#sidebar a.active-section {
+    font-weight: bold;
+    color: #0b63a5;
+    text-decoration: underline;
+}
+`;
+document.head.appendChild(style);
+
+// ====== Floating Search (highlight matching text) ======
+document.getElementById("searchInput").addEventListener("input", function(){
+    let q = this.value.toLowerCase();
+    document.querySelectorAll("#content p, #content li, #content pre").forEach(el => {
+        el.style.background = "";
+        if(q.length > 2 && el.innerText.toLowerCase().includes(q)){
+            el.style.background = "yellow";
+        }
+    });
+});
+
+// ====== Prism Syntax Highlighting ======
+Prism.highlightAll();
 </script>
 
 </body>
