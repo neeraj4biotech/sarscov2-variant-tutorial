@@ -195,21 +195,29 @@
       </section>
 
       <section id="step1">
-        <h2 class="section-title">Step 1 — Data Preparation</h2>
-        <p class="meta">Start an <strong>ICE job container</strong> with the <code class="inline">sratoolkit</code> image. Allocate at least <strong>2 CPUs</strong> and <strong>8 GB</strong> memory. Connect to the container terminal as shown in the platform UI.</p>
+  <h2 class="section-title">Step 1 — Data Preparation</h2>
 
-        <div class="card">
-          <strong>Commands</strong>
-          <div class="cmd-wrap">
-            <button class="copy-btn" data-target="cmd1">Copy</button>
-            <pre id="cmd1">prefetch SRR15571424
+  <h3 id="step1-download">Download SRA Data</h3>
+  <p class="meta">Use prefetch to download the SRA record.</p>
+
+  <h3 id="step1-fasterq">Convert to FASTQ</h3>
+  <p class="meta">Use fasterq-dump to extract FASTQ files.</p>
+
+  <h3 id="step1-gzip">Compress FASTQ</h3>
+  <p class="meta">Gzip the resulting FASTQ files.</p>
+
+  <div class="card">
+    <strong>Commands</strong>
+    <div class="cmd-wrap">
+      <button class="copy-btn" data-target="cmd1">Copy</button>
+      <pre id="cmd1">prefetch SRR15571424
 fasterq-dump SRR15571424 -S -e 2
 gzip SRR15571424_1.fastq
 gzip SRR15571424_2.fastq</pre>
-          </div>
-          <p class="footnote">Notes: <code>prefetch</code> downloads the SRA file; <code>fasterq-dump</code> converts to FASTQ. See tool docs below for options.</p>
-        </div>
-      </section>
+    </div>
+    <p class="footnote">Notes: prefetch downloads the SRA file; fasterq-dump converts to FASTQ.</p>
+  </div>
+</section>
 
       <section id="step2">
         <h2 class="section-title">Step 2 — Quality Check (FastQC)</h2>
